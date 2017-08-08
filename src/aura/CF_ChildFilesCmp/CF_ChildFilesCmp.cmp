@@ -1,0 +1,114 @@
+<!--
+    Developed by Doug Ayers (douglascayers.com)
+ -->
+<aura:component controller="CF_ChildFilesController" implements="flexipage:availableForRecordHome,force:hasRecordId,force:hasSObjectName">
+
+    <aura:attribute name="sObjectDescribe"
+                    type="Object"
+                    description="SObject and Field describe info"/>
+
+    <aura:attribute name="sObjectName"
+                    type="String"
+                    description="The object name of the record to be displayed. Provided by force:hasSObjectName interface."/>
+
+    <aura:attribute name="recordId"
+                    type="String"
+                    description="The ID of the record to be displayed. Provided by force:hasRecordId interface."/>
+
+    <aura:attribute name="record"
+                    type="Object"
+                    description="The record object to be displayed."/>
+
+    <aura:attribute name="childRelationshipNames"
+                    type="String"
+                    description="Comma-separated list of child relationship API names provided by design attributes in App Builder."/>
+
+    <aura:attribute name="childRelationshipFiles"
+                    type="Object[]"
+                    description=""/>
+
+    <aura:attribute name="selectedIndex"
+                    type="Integer"
+                    default="0"
+                    description=""/>
+
+    <aura:attribute name="selectedFiles"
+                    type="Object[]"
+                    description=""/>
+
+    <!-- Events -->
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    <!-- Markup -->
+
+    <div class="slds-grid">
+
+        <div class="slds-col slds-size_1-of-3 slds-m-right_small slds-p-right_small slds-border_right">
+
+            <nav class="slds-nav-vertical" aria-label="Relationships">
+                <div class="slds-nav-vertical__section">
+                    <h2 id="entity-header" class="slds-nav-vertical__title slds-text-title_caps">Relationships</h2>
+                    <ul>
+                        <aura:iteration var="relationship" items="{!v.childRelationshipFiles}" indexVar="index">
+                            <li class="{! 'slds-nav-vertical__item ' + if( equals( v.selectedIndex, index ), 'slds-is-active', '' )}">
+                                <a href="javascript:void(0);" class="slds-nav-vertical__action" aria-describedby="entity-header">
+                                    {!relationship.name} {!index}
+                                    <span class="slds-badge slds-col_bump-left">
+                                        <span class="slds-assistive-text">:</span>
+                                        {!relationship.files.length}
+                                        <span class="slds-assistive-text">Files</span>
+                                    </span>
+                                </a>
+                            </li>
+                        </aura:iteration>
+                    </ul>
+                </div>
+            </nav>
+
+        </div>
+
+        <div class="slds-col slds-size_2-of-3">
+
+            <table class="slds-table slds-table_bordered">
+                <thead>
+                    <tr class="slds-text-title_caps">
+                        <th scope="col" class="slds-cell-wrap">
+                            <div class="slds-truncate" title="Title">Title</div>
+                        </th>
+                        <th scope="col" class="slds-cell-wrap">
+                            <div class="slds-truncate" title="Owner">Owner</div>
+                        </th>
+                        <th scope="col" class="slds-cell-wrap">
+                            <div class="slds-truncate" title="Last Modified">Last Modified</div>
+                        </th>
+                        <th scope="col" class="slds-cell-wrap">
+                            <div class="slds-truncate" title="Size">Size</div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <aura:iteration var="file" items="{!v.selectedFiles}">
+                        <tr>
+                            <th scope="row" data-label="{!file.Title}" class="slds-cell-wrap">
+                                <div class="slds-truncate" title="{!file.Title}"><a href="javascript:void(0);">{!file.Title}</a></div>
+                            </th>
+                            <td data-label="Owner" class="slds-cell-wrap">
+                                <div class="slds-truncate" title="{!file.Owner}">{!file.Owner}</div>
+                            </td>
+                            <td data-label="Last Modified" class="slds-cell-wrap">
+                                <div class="slds-truncate" title="{!file.LastModifiedDate}">{!file.LastModifiedDate}</div>
+                            </td>
+                            <td data-label="Size" class="slds-cell-wrap">
+                                <div class="slds-truncate" title="{!file.HumanReadableContentSize}">{!file.HumanReadableContentSize}</div>
+                            </td>
+                        </tr>
+                    </aura:iteration>
+                </tbody>
+            </table>
+
+        </div>
+
+    </div>
+
+</aura:component>
