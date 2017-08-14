@@ -3,6 +3,8 @@ View Salesforce Files of Related Records
 
 Coming soon!
 
+https://help.salesforce.com/articleView?id=000231874&type=1
+
 This only works when the ContentVersion.FirstPublishLocationId is a child entity of the parent entity you want to share to.
 For example, when uploading a file to a contact record.
 
