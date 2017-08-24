@@ -1,3 +1,7 @@
-public with sharing class CF_ChildFilesControllerTest {
+/**
+ * Developed by Doug Ayers (douglascayers.com)
+ */
+@IsTest
+private class CF_ChildFilesControllerTest {
 
 }

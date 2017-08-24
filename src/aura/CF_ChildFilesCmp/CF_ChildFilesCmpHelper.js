@@ -22,36 +22,36 @@
     getRelatedFilesForIndexAsync : function( component, index ) {
 
         var helper = this;
-        
+
         var recordId = component.get( 'v.recordId' );
         var objectDescribe = component.get( 'v.sObjectDescribe' );
         var childRelationshipFiles = component.get( 'v.childRelationshipFiles' );
-        
+
 		var name = childRelationshipFiles[index].name;
         var objectName = objectDescribe.childRelationships[name].objectName;
         var fieldName = objectDescribe.childRelationships[name].fieldName;
-        
+
         return helper.getRelatedFilesAsync( component, objectName, fieldName, recordId )
         	.then( $A.getCallback( function( response ) {
-            
+
 	            var childRelationshipFiles = component.get( 'v.childRelationshipFiles' );
                 var selectedIndex = component.get( 'v.selectedIndex' );
-            
+
 	            childRelationshipFiles[index].files = response.files;
                 childRelationshipFiles[index].selected = ( selectedIndex == index );
-	            
+
     	        if ( selectedIndex == index ) {
 	                component.set( 'v.selectedFiles', response.files );
 	            }
-                
+
 				component.set( 'v.childRelationshipFiles', childRelationshipFiles );
-                
+
                 return response;
-            
+
         	}));
-        
+
     },
-    
+
     getRelatedFilesAsync : function( component, objectName, fieldName, fieldValue ) {
 
         var helper = this;
