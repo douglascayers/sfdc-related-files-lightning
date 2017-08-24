@@ -13,16 +13,29 @@
                 var childRelationshipNames = component.get( 'v.childRelationshipNames' );
                 var childRelationshipFiles = [];
 
-                if ( !$A.util.isUndefinedOrNull( childRelationshipNames ) ) {
+                if ( $A.util.isEmpty( childRelationshipNames ) ) {
 
-                    var names = childRelationshipNames.split(',');
+                    childRelationshipNames = [];
+                    for ( var relationshipName in objectDescribe.childRelationships ) {
+                        childRelationshipNames.push( relationshipName );
+                    }
+                    childRelationshipNames.sort();
 
-                    for ( var i = 0; i < names.length; i++ ) {
+                } else {
 
-                        var name = names[i].trim();
+                    childRelationshipNames = childRelationshipNames.split( ',' );
+
+                }
+
+                if ( !$A.util.isEmpty( childRelationshipNames ) ) {
+
+                    for ( var i = 0; i < childRelationshipNames.length; i++ ) {
+
+                        var relationshipName = childRelationshipNames[i].trim();
 
                         childRelationshipFiles[i] = {
-                            'name' : name,
+                            'name' : relationshipName,
+                            'describe' : objectDescribe.childRelationships[relationshipName],
                             'selected' : ( i == selectedIndex ),
                             'files' : []
                         };
@@ -33,6 +46,7 @@
 
                 component.set( 'v.childRelationshipFiles', childRelationshipFiles );
 
+                // TODO how to do these separately rather than get boxcarred together?
                 for ( var i = 0; i < childRelationshipFiles.length; i++ ) {
                 	helper.getRelatedFilesForIndexAsync( component, i );
                 }

@@ -14,62 +14,75 @@ public with sharing class CF_ChildFilesController {
     @AuraEnabled
     public static List<Map<String, Object>> getRelatedFiles( String objectName, String fieldName, String fieldValue ) {
 
-        String query = String.format(
-            ' SELECT ' +
-                ' ContentDocument.LatestPublishedVersion.Id, ' +
-                ' ContentDocument.LatestPublishedVersion.ContentDocumentId, ' +
-                ' ContentDocument.LatestPublishedVersion.Title, ' +
-                ' ContentDocument.LatestPublishedVersion.OwnerId, ' +
-                ' ContentDocument.LatestPublishedVersion.Owner.Name, ' +
-                ' ContentDocument.LatestPublishedVersion.ContentSize, ' +
-                ' ContentDocument.LatestPublishedVersion.PathOnClient, ' +
-                ' ContentDocument.LatestPublishedVersion.FileExtension, ' +
-                ' ContentDocument.LatestPublishedVersion.CreatedDate, ' +
-                ' ContentDocument.LatestPublishedVersion.LastModifiedDate ' +
-            ' FROM ' +
-                ' ContentDocumentLink ' +
-            ' WHERE ' +
-                ' LinkedEntityId IN ( ' +
-                    ' SELECT id FROM {0} WHERE {1} = {2} ' +
-                ' ) ' +
-            ' LIMIT 100 '
-            , new String[] { String.escapeSingleQuotes( objectName ), String.escapeSingleQuotes( fieldName ), quote( fieldvalue ) }
-        );
-
-        // since we can't group by system dates or some fields on content version
-        // then having to use a set to identify the unique files out of all the shared links
-        Set<ContentVersion> contentVersions = new Set<ContentVersion>();
-        for ( ContentDocumentLink cdl : Database.query( query ) ) {
-            contentVersions.add( cdl.ContentDocument.LatestPublishedVersion );
-        }
-
-        // once we have the unique files then add to a list of wrapper classes
-        // that implements our custom sorting logic since any order by in soql
-        // is rendered useless by having had to dedupe with a set
-        List<ContentVersionWrapper> wrappers = new List<ContentVersionWrapper>();
-        for ( ContentVersion cv : contentVersions ) {
-            wrappers.add( new ContentVersionWrapper( cv ) );
-        }
-        wrappers.sort();
-
         List<Map<String, Object>> files = new List<Map<String, Object>>();
 
-        for ( ContentVersionWrapper wrapper : wrappers ) {
-            files.add( new Map<String, Object>{
-                'Id' => wrapper.file.Id,
-                'ContentDocumentId' => wrapper.file.ContentDocumentId,
-                'Title' => wrapper.file.Title,
-                'OwnerId' => wrapper.file.OwnerId,
-                'OwnerName' => wrapper.file.Owner.Name,
-                'ContentSize' => wrapper.file.ContentSize,
-                'HumanReadableContentSize' => getHumanReadableByteCount( wrapper.file.ContentSize ),
-                'PathOnClient' => wrapper.file.PathOnClient,
-                'FileExtension' => wrapper.file.FileExtension,
-                'CreatedDate' => wrapper.file.CreatedDate,
-                'CreatedDateTimestamp' => wrapper.file.CreatedDate.getTime(),
-                'LastModifiedDate' => wrapper.file.LastModifiedDate,
-                'LastModifiedDateTimestamp' => wrapper.file.LastModifiedDate.getTime()
-            });
+        String recordIdsQuery = String.format(
+            'SELECT id FROM {0} WHERE {1} = {2}',
+            new String[] { String.escapeSingleQuotes( objectName ), String.escapeSingleQuotes( fieldName ), quote( fieldvalue ) }
+        );
+
+        Set<ID> entityIds = new Set<ID>();
+
+        for ( SObject record : Database.query( recordIdsQuery ) ) {
+            entityIds.add( record.id );
+        }
+
+        if ( entityIds.size() > 0 ) {
+
+            String query =
+                ' SELECT ' +
+                    ' ContentDocument.LatestPublishedVersion.Id, ' +
+                    ' ContentDocument.LatestPublishedVersion.ContentDocumentId, ' +
+                    ' ContentDocument.LatestPublishedVersion.Title, ' +
+                    ' ContentDocument.LatestPublishedVersion.OwnerId, ' +
+                    ' ContentDocument.LatestPublishedVersion.Owner.Name, ' +
+                    ' ContentDocument.LatestPublishedVersion.ContentSize, ' +
+                    ' ContentDocument.LatestPublishedVersion.PathOnClient, ' +
+                    ' ContentDocument.LatestPublishedVersion.FileExtension, ' +
+                    ' ContentDocument.LatestPublishedVersion.CreatedDate, ' +
+                    ' ContentDocument.LatestPublishedVersion.LastModifiedDate ' +
+                ' FROM ' +
+                    ' ContentDocumentLink ' +
+                ' WHERE ' +
+                    ' LinkedEntityId IN :entityIds ' +
+                ' LIMIT 100 ';
+
+            System.debug( 'query=' + query );
+
+            // since we can't group by system dates or some fields on content version
+            // then having to use a set to identify the unique files out of all the shared links
+            Set<ContentVersion> contentVersions = new Set<ContentVersion>();
+            for ( ContentDocumentLink cdl : Database.query( query ) ) {
+                contentVersions.add( cdl.ContentDocument.LatestPublishedVersion );
+            }
+
+            // once we have the unique files then add to a list of wrapper classes
+            // that implements our custom sorting logic since any order by in soql
+            // is rendered useless by having had to dedupe with a set
+            List<ContentVersionWrapper> wrappers = new List<ContentVersionWrapper>();
+            for ( ContentVersion cv : contentVersions ) {
+                wrappers.add( new ContentVersionWrapper( cv ) );
+            }
+            wrappers.sort();
+
+            for ( ContentVersionWrapper wrapper : wrappers ) {
+                files.add( new Map<String, Object>{
+                    'Id' => wrapper.file.Id,
+                    'ContentDocumentId' => wrapper.file.ContentDocumentId,
+                    'Title' => wrapper.file.Title,
+                    'OwnerId' => wrapper.file.OwnerId,
+                    'OwnerName' => wrapper.file.Owner.Name,
+                    'ContentSize' => wrapper.file.ContentSize,
+                    'HumanReadableContentSize' => getHumanReadableByteCount( wrapper.file.ContentSize ),
+                    'PathOnClient' => wrapper.file.PathOnClient,
+                    'FileExtension' => wrapper.file.FileExtension,
+                    'CreatedDate' => wrapper.file.CreatedDate,
+                    'CreatedDateTimestamp' => wrapper.file.CreatedDate.getTime(),
+                    'LastModifiedDate' => wrapper.file.LastModifiedDate,
+                    'LastModifiedDateTimestamp' => wrapper.file.LastModifiedDate.getTime()
+                });
+            }
+
         }
 
         return files;
@@ -159,6 +172,18 @@ public with sharing class CF_ChildFilesController {
 
     private static Map<String, Map<String, Object>> getChildRelationshipMaps( List<ChildRelationship> childRelationships ) {
 
+        Set<String> fileLinkableObjectNames = new Set<String>();
+
+        for ( SObjectType objType : ContentDocumentLink.LinkedEntityId.getDescribe().getReferenceTo() ) {
+
+            DescribeSObjectResult objectDescribe = objType.getDescribe();
+
+            if ( objectDescribe.isAccessible() ) {
+                fileLinkableObjectNames.add( objectDescribe.getName() );
+            }
+
+        }
+
         Map<String, Map<String, Object>> describeMaps = new Map<String, Map<String, Object>>();
 
         for ( ChildRelationship relationship : childRelationships ) {
@@ -166,13 +191,18 @@ public with sharing class CF_ChildFilesController {
             DescribeSObjectResult objectDescribe = relationship.getChildSObject().getDescribe();
             DescribeFieldResult fieldDescribe = relationship.getField().getDescribe();
 
-            describeMaps.put( relationship.getRelationshipName(), new Map<String, Object>{
-                'fieldName' => fieldDescribe.getName(),
-                'fieldLabel' => fieldDescribe.getLabel(),
-                'objectName' => objectDescribe.getName(),
-                'objectLabel' => objectDescribe.getLabel(),
-                'objectLabelPlural' => objectDescribe.getLabelPlural()
-            });
+            if ( String.isNotBlank( relationship.getRelationshipName() ) && fileLinkableObjectNames.contains( objectDescribe.getName() ) ) {
+
+                describeMaps.put( relationship.getRelationshipName(), new Map<String, Object>{
+                    'fieldName' => fieldDescribe.getName(),
+                    'fieldLabel' => fieldDescribe.getLabel(),
+                    'objectName' => objectDescribe.getName(),
+                    'objectLabel' => objectDescribe.getLabel(),
+                    'objectLabelPlural' => objectDescribe.getLabelPlural()
+                });
+
+            }
+
         }
 
         return describeMaps;
