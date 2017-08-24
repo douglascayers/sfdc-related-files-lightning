@@ -1,9 +1,6 @@
 ({
     doInit : function( component, event, helper ) {
 
-        // TODO remove
-        component.set( 'v.selectedFiles', [ { 'Title' : 'hello.txt', 'Owner' : 'Doug Ayers' }]);
-
         var objectName = component.get( 'v.sObjectName' );
         var recordId = component.get( 'v.recordId' );
 
@@ -12,6 +9,7 @@
 
                 component.set( 'v.sObjectDescribe', objectDescribe );
 
+                var selectedIndex = component.get( 'v.selectedIndex' );
                 var childRelationshipNames = component.get( 'v.childRelationshipNames' );
                 var childRelationshipFiles = [];
 
@@ -25,32 +23,49 @@
 
                         childRelationshipFiles[i] = {
                             'name' : name,
+                            'selected' : ( i == selectedIndex ),
                             'files' : []
                         };
-
-                        helper.getRelatedFilesAsync(
-                            component,
-                            i,
-                            objectDescribe.childRelationships[name].objectName,
-                            objectDescribe.childRelationships[name].fieldName,
-                            recordId )
-                            .then( $A.getCallback( function( response ) {
-
-                                var childRelationshipFiles = component.get( 'v.childRelationshipFiles' );
-
-                                childRelationshipFiles[response.index].files = response.files;
-
-                                component.set( 'v.childRelationshipFiles', childRelationshipFiles );
-
-                            }));
 
                     }
 
                 }
-
+                
                 component.set( 'v.childRelationshipFiles', childRelationshipFiles );
 
+                for ( var i = 0; i < childRelationshipFiles.length; i++ ) {
+                	helper.getRelatedFilesForIndexAsync( component, i );
+                }
+
             }));
+
+    },
+    
+    handleChildRelationshipClick : function( component, event, helper ) {
+
+		var childRelationshipFiles = component.get( 'v.childRelationshipFiles' );
+        var selectedIndex = component.get( 'v.selectedIndex' );
+        var clickedIndex = event.srcElement.getAttribute( 'data-index' );
+        
+        childRelationshipFiles[selectedIndex].selected = false;
+        childRelationshipFiles[clickedIndex].selected = true;
+        
+        component.set( 'v.selectedFiles', childRelationshipFiles[clickedIndex].files );
+        component.set( 'v.childRelationshipFiles', childRelationshipFiles );
+        component.set( 'v.selectedIndex', clickedIndex );
+        
+        helper.getRelatedFilesForIndexAsync( component, clickedIndex );
+       
+    },
+    
+    handleFileClick : function( component, event, helper ) {
+        
+        var clickedFileId = event.srcElement.getAttribute( 'data-fileId' );
+
+		$A.get( 'e.lightning:openFiles' ).fire({
+            recordIds : component.get( 'v.selectedFiles' ).map( function( file ) { return file.ContentDocumentId; } ),
+            selectedRecordId : clickedFileId
+    	});
 
     }
 })

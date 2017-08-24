@@ -31,7 +31,8 @@ public with sharing class CF_ChildFilesController {
             ' WHERE ' +
                 ' LinkedEntityId IN ( ' +
                     ' SELECT id FROM {0} WHERE {1} = {2} ' +
-                ' ) '
+                ' ) ' +
+            ' LIMIT 100 '
             , new String[] { String.escapeSingleQuotes( objectName ), String.escapeSingleQuotes( fieldName ), quote( fieldvalue ) }
         );
 
@@ -59,13 +60,15 @@ public with sharing class CF_ChildFilesController {
                 'ContentDocumentId' => wrapper.file.ContentDocumentId,
                 'Title' => wrapper.file.Title,
                 'OwnerId' => wrapper.file.OwnerId,
-                'Owner.Name' => wrapper.file.Owner.Name,
+                'OwnerName' => wrapper.file.Owner.Name,
                 'ContentSize' => wrapper.file.ContentSize,
                 'HumanReadableContentSize' => getHumanReadableByteCount( wrapper.file.ContentSize ),
                 'PathOnClient' => wrapper.file.PathOnClient,
                 'FileExtension' => wrapper.file.FileExtension,
                 'CreatedDate' => wrapper.file.CreatedDate,
-                'LastModifiedDate' => wrapper.file.LastModifiedDate
+                'CreatedDateTimestamp' => wrapper.file.CreatedDate.getTime(),
+                'LastModifiedDate' => wrapper.file.LastModifiedDate,
+                'LastModifiedDateTimestamp' => wrapper.file.LastModifiedDate.getTime()
             });
         }
 
