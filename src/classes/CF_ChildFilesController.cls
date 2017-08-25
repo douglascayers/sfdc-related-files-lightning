@@ -194,6 +194,7 @@ public with sharing class CF_ChildFilesController {
             if ( String.isNotBlank( relationship.getRelationshipName() ) && fileLinkableObjectNames.contains( objectDescribe.getName() ) ) {
 
                 describeMaps.put( relationship.getRelationshipName(), new Map<String, Object>{
+                    'relationshipName' => relationship.getRelationshipName(),
                     'fieldName' => fieldDescribe.getName(),
                     'fieldLabel' => fieldDescribe.getLabel(),
                     'objectName' => objectDescribe.getName(),

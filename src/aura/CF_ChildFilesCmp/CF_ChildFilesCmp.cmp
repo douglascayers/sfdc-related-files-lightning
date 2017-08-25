@@ -36,15 +36,21 @@
                     type="Object[]"
                     description=""/>
 
+    <aura:attribute name="selectedRelationship"
+                    type="Object"
+                    description=""/>
+
     <!-- Events -->
 
     <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
 
     <!-- Markup -->
 
+    <lightning:spinner aura:id="spinner" variant="brand"/>
+
     <div class="slds-grid">
 
-        <div class="slds-col slds-size_1-of-3 slds-m-right_small slds-p-right_small slds-border_right">
+        <div class="slds-col slds-size_1-of-4 slds-m-right_small slds-p-right_small slds-border_right">
 
             <nav class="slds-nav-vertical" aria-label="Relationships">
                 <div class="slds-nav-vertical__section">
@@ -54,16 +60,12 @@
                             <li class="{! 'slds-nav-vertical__item ' + if( relationship.selected, 'slds-is-active', '' )}">
                                 <a href="javascript:void(0);"
                                    class="slds-nav-vertical__action"
+                                   title="{!relationship.describe.objectLabelPlural + ' (' + relationship.name + ')'}"
                                    aria-describedby="entity-header"
                                    data-index="{!index}"
                                    onclick="{!c.handleChildRelationshipClick}">
 
                                     {!relationship.describe.objectLabelPlural}
-
-                                    <!-- TODO logic somewhere so this is only displayed if entity has multiple child relationships of same object type -->
-                                    <aura:if isTrue="{! not( equals( relationship.name, relationship.describe.objectLabelPlural ) ) }">
-                                        <span class="slds-text-color_weak slds-p-horizontal_small"><i>({!relationship.name})</i></span>
-                                    </aura:if>
 
                                     <span class="{! 'slds-badge slds-col_bump-left ' + if( greaterthan( relationship.files.length, 0 ), 'slds-theme_success', '' )}">
                                         <span class="slds-assistive-text">:</span>
@@ -80,30 +82,39 @@
 
         </div>
 
-        <div class="slds-col slds-size_2-of-3">
+        <div class="slds-col slds-size_3-of-4">
 
             <table class="slds-table slds-table_bordered">
                 <thead>
                     <tr class="slds-text-title_caps">
                         <th scope="col" class="slds-cell-wrap">
-                            <div class="slds-truncate" title="Title">Title</div>
+                            <div title="Title">Title</div>
                         </th>
                         <th scope="col" class="slds-cell-wrap">
-                            <div class="slds-truncate" title="Owner">Owner</div>
+                            <div title="Owner">Owner</div>
                         </th>
                         <th scope="col" class="slds-cell-wrap">
-                            <div class="slds-truncate" title="Last Modified">Last Modified</div>
+                            <div title="Last Modified">Last Modified</div>
                         </th>
                         <th scope="col" class="slds-cell-wrap">
-                            <div class="slds-truncate" title="Size">Size</div>
+                            <div title="Size">Size</div>
                         </th>
                     </tr>
                 </thead>
                 <tbody>
+
+                    <aura:if isTrue="{! empty( v.selectedFiles ) }">
+                        <tr>
+                            <th colspan="4">
+                                <div class="slds-text-align_center">No items to display.</div>
+                            </th>
+                        </tr>
+                    </aura:if>
+
                     <aura:iteration var="file" items="{!v.selectedFiles}">
                         <tr>
                             <th scope="row" data-label="{!file.Title}" class="slds-cell-wrap">
-                                <div class="slds-truncate" title="{!file.Title}">
+                                <div title="{!file.Title}">
                                     <a href="javascript:void(0);"
                                        data-fileId="{!file.ContentDocumentId}"
                                        onclick="{!c.handleFileClick}">
@@ -112,18 +123,25 @@
                                 </div>
                             </th>
                             <td data-label="Owner" class="slds-cell-wrap">
-                                <div class="slds-truncate" title="{!file.OwnerName}">{!file.OwnerName}</div>
+                                <div title="{!file.OwnerName}">
+                                    <a href="javascript:void(0);"
+                                       data-userId="{!file.OwnerId}"
+                                       onclick="{!c.handleUserClick}">
+                                        {!file.OwnerName}
+                                    </a>
+                                </div>
                             </td>
                             <td data-label="Last Modified" class="slds-cell-wrap">
-                                <div class="slds-truncate" title="{!file.LastModifiedDate}">
+                                <div title="{!file.LastModifiedDate}">
                                     <lightning:formattedDateTime value="{!file.LastModifiedDateTimestamp}" year="numeric" month="numeric" day="numeric" hour="numeric" minute="numeric"/>
 								</div>
                             </td>
                             <td data-label="Size" class="slds-cell-wrap">
-                                <div class="slds-truncate" title="{!file.HumanReadableContentSize}">{!file.HumanReadableContentSize}</div>
+                                <div title="{!file.HumanReadableContentSize}">{!file.HumanReadableContentSize}</div>
                             </td>
                         </tr>
                     </aura:iteration>
+
                 </tbody>
             </table>
 

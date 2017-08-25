@@ -19,7 +19,7 @@
 
     },
 
-    getRelatedFilesForIndexAsync : function( component, index ) {
+    getRelatedFilesForIndexAsync : function( component, index, runInBackground ) {
 
         var helper = this;
 
@@ -31,7 +31,7 @@
         var objectName = objectDescribe.childRelationships[name].objectName;
         var fieldName = objectDescribe.childRelationships[name].fieldName;
 
-        return helper.getRelatedFilesAsync( component, objectName, fieldName, recordId )
+        return helper.getRelatedFilesAsync( component, objectName, fieldName, recordId, runInBackground )
         	.then( $A.getCallback( function( response ) {
 
 	            var childRelationshipFiles = component.get( 'v.childRelationshipFiles' );
@@ -42,6 +42,7 @@
 
     	        if ( selectedIndex == index ) {
 	                component.set( 'v.selectedFiles', response.files );
+	                component.set( 'v.selectedRelationship', childRelationshipFiles[selectedIndex] );
 	            }
 
 				component.set( 'v.childRelationshipFiles', childRelationshipFiles );
@@ -52,7 +53,7 @@
 
     },
 
-    getRelatedFilesAsync : function( component, objectName, fieldName, fieldValue ) {
+    getRelatedFilesAsync : function( component, objectName, fieldName, fieldValue, background ) {
 
         var helper = this;
 
@@ -61,6 +62,11 @@
             'objectName' : objectName,
             'fieldName' : fieldName,
             'fieldValue' : fieldValue
+
+        }, {
+
+            'background' : background,
+            'storable' : true
 
         }).then( $A.getCallback( function( files ) {
 
@@ -138,7 +144,7 @@
 
     },
 
-    enqueueAction : function( component, actionName, params ) {
+    enqueueAction : function( component, actionName, params, options ) {
 
         var helper = this;
 
@@ -150,6 +156,11 @@
 
             if ( params ) {
                 action.setParams( params );
+            }
+
+            if ( options ) {
+                if ( options.background ) { action.setBackground(); }
+                if ( options.storable )   { action.setStorable(); }
             }
 
             action.setCallback( helper, function( response ) {

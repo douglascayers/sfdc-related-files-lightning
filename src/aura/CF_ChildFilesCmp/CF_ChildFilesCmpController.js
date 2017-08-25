@@ -16,10 +16,26 @@
                 if ( $A.util.isEmpty( childRelationshipNames ) ) {
 
                     childRelationshipNames = [];
+
+                    var childRelationships = [];
+
                     for ( var relationshipName in objectDescribe.childRelationships ) {
-                        childRelationshipNames.push( relationshipName );
+                        childRelationships.push( objectDescribe.childRelationships[relationshipName] );
                     }
-                    childRelationshipNames.sort();
+
+                    childRelationships.sort( function( a, b ) {
+                        if ( a.objectLabelPlural.toUpperCase() < b.objectLabelPlural.toUpperCase() ) {
+                            return -1;
+                        } else if ( a.objectLabelPlural.toUpperCase() > b.objectLabelPlural.toUpperCase() ) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    });
+
+                    childRelationshipNames = childRelationships.map( function( childRelationship ) {
+                        return childRelationship.relationshipName;
+                    });
 
                 } else {
 
@@ -32,13 +48,18 @@
                     for ( var i = 0; i < childRelationshipNames.length; i++ ) {
 
                         var relationshipName = childRelationshipNames[i].trim();
+                        var isSelected = ( i == selectedIndex );
 
                         childRelationshipFiles[i] = {
                             'name' : relationshipName,
                             'describe' : objectDescribe.childRelationships[relationshipName],
-                            'selected' : ( i == selectedIndex ),
-                            'files' : []
+                            'selected' : isSelected,
+                            'files' : null
                         };
+
+                        if ( isSelected ) {
+                            component.set( 'v.selectedRelationship', childRelationshipFiles[i] );
+                        }
 
                     }
 
@@ -46,9 +67,8 @@
 
                 component.set( 'v.childRelationshipFiles', childRelationshipFiles );
 
-                // TODO how to do these separately rather than get boxcarred together?
                 for ( var i = 0; i < childRelationshipFiles.length; i++ ) {
-                	helper.getRelatedFilesForIndexAsync( component, i );
+                	helper.getRelatedFilesForIndexAsync( component, i, true );
                 }
 
             }));
@@ -59,7 +79,7 @@
 
 		var childRelationshipFiles = component.get( 'v.childRelationshipFiles' );
         var selectedIndex = component.get( 'v.selectedIndex' );
-        var clickedIndex = event.srcElement.getAttribute( 'data-index' );
+        var clickedIndex = event.currentTarget.getAttribute( 'data-index' );
 
         childRelationshipFiles[selectedIndex].selected = false;
         childRelationshipFiles[clickedIndex].selected = true;
@@ -67,8 +87,9 @@
         component.set( 'v.selectedFiles', childRelationshipFiles[clickedIndex].files );
         component.set( 'v.childRelationshipFiles', childRelationshipFiles );
         component.set( 'v.selectedIndex', clickedIndex );
+        component.set( 'v.selectedRelationship', childRelationshipFiles[clickedIndex] );
 
-        helper.getRelatedFilesForIndexAsync( component, clickedIndex );
+        helper.getRelatedFilesForIndexAsync( component, clickedIndex, false );
 
     },
 
@@ -80,6 +101,14 @@
             recordIds : component.get( 'v.selectedFiles' ).map( function( file ) { return file.ContentDocumentId; } ),
             selectedRecordId : clickedFileId
     	});
+
+    },
+
+    handleUserClick : function( component, event, helper ) {
+
+        var clickedUserId = event.srcElement.getAttribute( 'data-userId' );
+
+        helper.navigateToRecord( clickedUserId );
 
     }
 })
