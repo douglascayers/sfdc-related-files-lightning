@@ -1,0 +1,5 @@
+<!--
+https://developer.salesforce.com/docs/atlas.en-us.lightning.meta/lightning/tokens_intro.htm
+-->
+<aura:tokens extends="force:base">
+</aura:tokens>
