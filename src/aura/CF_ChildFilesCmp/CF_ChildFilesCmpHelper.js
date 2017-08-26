@@ -195,6 +195,9 @@ License: BSD 3-Clause License
             else if ( /^HTML/i.test( file.FileType ) ) {
                 iconName = 'doctype:html';
             }
+            else if ( /^SNOTE/i.test( file.FileType ) ) {
+                iconName = 'doctype:stypi';
+            }
 
             file.FileTypeIconName = iconName;
 
