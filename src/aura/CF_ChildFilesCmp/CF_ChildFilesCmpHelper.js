@@ -25,6 +25,34 @@ License: BSD 3-Clause License
 
     },
 
+    loadAllChildRelationshipFilesAsync : function( component ) {
+
+        $A.util.removeClass( component.find( 'init-spinner' ), 'slds-hide' );
+
+        var helper = this;
+
+        var promises = [];
+        var childRelationshipFiles = component.get( 'v.childRelationshipFiles' );
+
+        for ( var i = 0; i < childRelationshipFiles.length; i++ ) {
+            promises.push( helper.getRelatedFilesForIndexAsync( component, i, true ) );
+        }
+
+        return Promise.all( promises )
+            .catch( function( err ) {
+                $A.get("e.force:showToast").setParams({
+                    'title' : 'Error loading files',
+                    'message' : err,
+                    'type' : 'error',
+                    'mode': 'sticky'
+                }).fire();
+            })
+            .then( function() {
+                $A.util.addClass( component.find( 'init-spinner' ), 'slds-hide' );
+            });
+
+    },
+
     getRelatedFilesForIndexAsync : function( component, index, runInBackground ) {
 
         var helper = this;
@@ -42,6 +70,8 @@ License: BSD 3-Clause License
 
 	            var childRelationshipFiles = component.get( 'v.childRelationshipFiles' );
                 var selectedIndex = component.get( 'v.selectedIndex' );
+
+                helper.applyFileTypeIconNames( component, response.files );
 
 	            childRelationshipFiles[index].files = response.files;
                 childRelationshipFiles[index].selected = ( selectedIndex == index );
@@ -85,6 +115,90 @@ License: BSD 3-Clause License
             helper.logActionErrors( component, errors );
 
         }));
+
+    },
+
+    getChildRelationshipNamesSorted : function( component, objectDescribe ) {
+
+        var childRelationships = [];
+
+        for ( var relationshipName in objectDescribe.childRelationships ) {
+            childRelationships.push( objectDescribe.childRelationships[relationshipName] );
+        }
+
+        childRelationships.sort( function( a, b ) {
+            if ( a.objectLabelPlural.toUpperCase() < b.objectLabelPlural.toUpperCase() ) {
+                return -1;
+            } else if ( a.objectLabelPlural.toUpperCase() > b.objectLabelPlural.toUpperCase() ) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+
+        var childRelationshipNames = childRelationships.map( function( childRelationship ) {
+            return childRelationship.relationshipName;
+        });
+
+        return childRelationshipNames;
+    },
+
+    applyFileTypeIconNames : function( component, files ) {
+
+        for ( var i = 0; i < files.length; i++ ) {
+
+            var iconName = 'doctype:attachment';
+            var file = files[i];
+
+            if ( /^POWER_POINT/i.test( file.FileType ) ) {
+                iconName = 'doctype:ppt';
+            }
+            else if ( /^EXCEL/i.test( file.FileType ) ) {
+                iconName = 'doctype:excel';
+            }
+            else if ( /^WORD/i.test( file.FileType ) ) {
+                iconName = 'doctype:word';
+            }
+            else if ( /^(MP3|WAV|M4A)/i.test( file.FileType ) ) {
+                iconName = 'doctype:audio';
+            }
+            else if ( /^MP4/i.test( file.FileType ) ) {
+                iconName = 'doctype:mp4';
+            }
+            else if ( /^CSV/i.test( file.FileType ) ) {
+                iconName = 'doctype:csv';
+            }
+            else if ( /^TEXT/i.test( file.FileType ) ) {
+                iconName = 'doctype:txt';
+            }
+            else if ( /^PDF/i.test( file.FileType ) ) {
+                iconName = 'doctype:pdf';
+            }
+            else if ( /^XML/i.test( file.FileType ) ) {
+                iconName = 'doctype:xml';
+            }
+            else if ( /^ZIP/i.test( file.FileType ) ) {
+                iconName = 'doctype:zip';
+            }
+            else if ( /^(PNG|GIF|JPG|JPEG|TIFF|BMP)/i.test( file.FileType ) ) {
+                iconName = 'doctype:image';
+            }
+            else if ( /^PACK/i.test( file.FileType ) ) {
+                iconName = 'doctype:pack';
+            }
+            else if ( /^(MOV|WMV|M4V)/i.test( file.FileType ) ) {
+                iconName = 'doctype:movie';
+            }
+            else if ( /^LINK/i.test( file.FileType ) ) {
+                iconName = 'doctype:link';
+            }
+            else if ( /^HTML/i.test( file.FileType ) ) {
+                iconName = 'doctype:html';
+            }
+
+            file.FileTypeIconName = iconName;
+
+        }
 
     },
 

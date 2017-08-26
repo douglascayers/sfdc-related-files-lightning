@@ -19,34 +19,12 @@ License: BSD 3-Clause License
                 var childRelationshipNames = component.get( 'v.childRelationshipNames' );
                 var childRelationshipFiles = [];
 
+                // if specific list of relationship names are not provided
+                // then use all available child relationships in object describe
                 if ( $A.util.isEmpty( childRelationshipNames ) ) {
-
-                    childRelationshipNames = [];
-
-                    var childRelationships = [];
-
-                    for ( var relationshipName in objectDescribe.childRelationships ) {
-                        childRelationships.push( objectDescribe.childRelationships[relationshipName] );
-                    }
-
-                    childRelationships.sort( function( a, b ) {
-                        if ( a.objectLabelPlural.toUpperCase() < b.objectLabelPlural.toUpperCase() ) {
-                            return -1;
-                        } else if ( a.objectLabelPlural.toUpperCase() > b.objectLabelPlural.toUpperCase() ) {
-                            return 1;
-                        } else {
-                            return 0;
-                        }
-                    });
-
-                    childRelationshipNames = childRelationships.map( function( childRelationship ) {
-                        return childRelationship.relationshipName;
-                    });
-
+                    childRelationshipNames = helper.getChildRelationshipNamesSorted( component, objectDescribe );
                 } else {
-
                     childRelationshipNames = childRelationshipNames.split( ',' );
-
                 }
 
                 if ( !$A.util.isEmpty( childRelationshipNames ) ) {
@@ -73,9 +51,7 @@ License: BSD 3-Clause License
 
                 component.set( 'v.childRelationshipFiles', childRelationshipFiles );
 
-                for ( var i = 0; i < childRelationshipFiles.length; i++ ) {
-                	helper.getRelatedFilesForIndexAsync( component, i, true );
-                }
+                helper.loadAllChildRelationshipFilesAsync( component );
 
             }));
 

@@ -18,9 +18,10 @@ License: BSD 3-Clause License
                     type="String"
                     description="The ID of the record to be displayed. Provided by force:hasRecordId interface."/>
 
-    <aura:attribute name="record"
-                    type="Object"
-                    description="The record object to be displayed."/>
+    <aura:attribute name="componentCardTitle"
+                    type="String"
+                    default="Related Files"
+                    description="Title of the lightning:card component wrapping content."/>
 
     <aura:attribute name="childRelationshipNames"
                     type="String"
@@ -49,108 +50,121 @@ License: BSD 3-Clause License
 
     <!-- Markup -->
 
+    <lightning:spinner aura:id="init-spinner" variant="brand"/>
     <lightning:spinner aura:id="spinner" variant="brand"/>
 
-    <div class="slds-grid">
+    <lightning:card iconName="standard:file" title="{!v.componentCardTitle}">
 
-        <div class="slds-col slds-size_1-of-4 slds-m-right_small slds-p-right_small slds-border_right">
+        <div class="slds-grid">
 
-            <nav class="slds-nav-vertical" aria-label="Relationships">
-                <div class="slds-nav-vertical__section">
-                    <h2 id="entity-header" class="slds-nav-vertical__title slds-text-title_caps">Relationships</h2>
-                    <ul>
-                        <aura:iteration var="relationship" items="{!v.childRelationshipFiles}" indexVar="index">
-                            <li class="{! 'slds-nav-vertical__item ' + if( relationship.selected, 'slds-is-active', '' )}">
-                                <a href="javascript:void(0);"
-                                   class="slds-nav-vertical__action"
-                                   title="{!relationship.describe.objectLabelPlural + ' (' + relationship.name + ')'}"
-                                   aria-describedby="entity-header"
-                                   data-index="{!index}"
-                                   onclick="{!c.handleChildRelationshipClick}">
+            <div class="slds-col slds-size_1-of-4 slds-m-right_small slds-p-right_small slds-border_right">
 
-                                    {!relationship.describe.objectLabelPlural}
+                <nav class="slds-nav-vertical" aria-label="Relationships">
+                    <div class="slds-nav-vertical__section">
+                        <ul>
+                            <aura:iteration var="relationship" items="{!v.childRelationshipFiles}" indexVar="index">
+                                <li class="{! 'slds-nav-vertical__item ' + if( relationship.selected, 'slds-is-active', '' )}">
+                                    <a href="javascript:void(0);"
+                                       class="slds-nav-vertical__action"
+                                       title="{!relationship.describe.objectLabelPlural + ' (' + relationship.name + ')'}"
+                                       aria-describedby="entity-header"
+                                       data-index="{!index}"
+                                       onclick="{!c.handleChildRelationshipClick}">
 
-                                    <span class="{! 'slds-badge slds-col_bump-left ' + if( greaterthan( relationship.files.length, 0 ), 'slds-theme_success', '' )}">
-                                        <span class="slds-assistive-text">:</span>
-                                        {!relationship.files.length}
-                                        <span class="slds-assistive-text">Files</span>
-                                    </span>
+                                        {!relationship.describe.objectLabelPlural}
 
-                                </a>
-                            </li>
+                                        <span class="{! 'slds-badge slds-col_bump-left ' + if( greaterthan( relationship.files.length, 0 ), 'slds-theme_success', '' )}">
+                                            <span class="slds-assistive-text">:</span>
+                                            {!relationship.files.length}
+                                            <span class="slds-assistive-text">Files</span>
+                                        </span>
+
+                                    </a>
+                                </li>
+                            </aura:iteration>
+                        </ul>
+                    </div>
+                </nav>
+
+            </div>
+
+            <div class="slds-col slds-size_3-of-4 slds-p-right_small">
+
+                <table class="slds-table slds-table_bordered">
+                    <thead>
+                        <tr class="slds-text-title_caps">
+                            <th scope="col" class="slds-cell-wrap">
+                                &nbsp;
+                            </th>
+                            <th scope="col" class="slds-cell-wrap">
+                                <div title="Title">Title</div>
+                            </th>
+                            <th scope="col" class="slds-cell-wrap">
+                                <div title="Owner">Owner</div>
+                            </th>
+                            <th scope="col" class="slds-cell-wrap">
+                                <div title="Last Modified">Last Modified</div>
+                            </th>
+                            <th scope="col" class="slds-cell-wrap">
+                                <div title="Size">Size</div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <aura:if isTrue="{! empty( v.selectedFiles ) }">
+                            <tr>
+                                <th colspan="5">
+                                    <div class="slds-text-align_center">No items to display.</div>
+                                </th>
+                            </tr>
+                        </aura:if>
+
+                        <aura:iteration var="file" items="{!v.selectedFiles}" indexVar="fileIndex">
+                            <tr>
+                                <td align="center">
+                                    <div title="{!'Row ' + (fileIndex + 1)}" class="slds-text-body_small slds-text-color--weak slds-text-align_center">
+                                        {!fileIndex + 1}
+                                    </div>
+                                </td>
+                                <th scope="row" data-label="{!file.Title}" class="slds-cell-wrap">
+                                    <div title="{!file.Title}">
+                                        <lightning:icon iconName="{!file.FileTypeIconName}" class="slds-p-right_x-small" size="x-small"/>
+                                        <a href="javascript:void(0);"
+                                           data-fileId="{!file.ContentDocumentId}"
+                                           onclick="{!c.handleFileClick}">
+                                            {!file.Title}
+                                        </a>
+                                    </div>
+                                </th>
+                                <td data-label="Owner" class="slds-cell-wrap">
+                                    <div title="{!file.OwnerName}">
+                                        <a href="javascript:void(0);"
+                                           data-userId="{!file.OwnerId}"
+                                           onclick="{!c.handleUserClick}">
+                                            {!file.OwnerName}
+                                        </a>
+                                    </div>
+                                </td>
+                                <td data-label="Last Modified" class="slds-cell-wrap">
+                                    <div title="{!file.LastModifiedDateTimestamp}">
+                                        <lightning:formattedDateTime value="{!file.LastModifiedDateTimestamp}" year="numeric" month="numeric" day="numeric" hour="numeric" minute="numeric"/>
+                                    </div>
+                                </td>
+                                <td data-label="Size" class="slds-cell-wrap">
+                                    <div title="{!file.HumanReadableContentSize}">{!file.HumanReadableContentSize}</div>
+                                </td>
+                            </tr>
                         </aura:iteration>
-                    </ul>
-                </div>
-            </nav>
+
+                    </tbody>
+                </table>
+
+            </div>
 
         </div>
 
-        <div class="slds-col slds-size_3-of-4">
-
-            <table class="slds-table slds-table_bordered">
-                <thead>
-                    <tr class="slds-text-title_caps">
-                        <th scope="col" class="slds-cell-wrap">
-                            <div title="Title">Title</div>
-                        </th>
-                        <th scope="col" class="slds-cell-wrap">
-                            <div title="Owner">Owner</div>
-                        </th>
-                        <th scope="col" class="slds-cell-wrap">
-                            <div title="Last Modified">Last Modified</div>
-                        </th>
-                        <th scope="col" class="slds-cell-wrap">
-                            <div title="Size">Size</div>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-
-                    <aura:if isTrue="{! empty( v.selectedFiles ) }">
-                        <tr>
-                            <th colspan="4">
-                                <div class="slds-text-align_center">No items to display.</div>
-                            </th>
-                        </tr>
-                    </aura:if>
-
-                    <aura:iteration var="file" items="{!v.selectedFiles}">
-                        <tr>
-                            <th scope="row" data-label="{!file.Title}" class="slds-cell-wrap">
-                                <div title="{!file.Title}">
-                                    <a href="javascript:void(0);"
-                                       data-fileId="{!file.ContentDocumentId}"
-                                       onclick="{!c.handleFileClick}">
-                                        {!file.Title}
-                                    </a>
-                                </div>
-                            </th>
-                            <td data-label="Owner" class="slds-cell-wrap">
-                                <div title="{!file.OwnerName}">
-                                    <a href="javascript:void(0);"
-                                       data-userId="{!file.OwnerId}"
-                                       onclick="{!c.handleUserClick}">
-                                        {!file.OwnerName}
-                                    </a>
-                                </div>
-                            </td>
-                            <td data-label="Last Modified" class="slds-cell-wrap">
-                                <div title="{!file.LastModifiedDate}">
-                                    <lightning:formattedDateTime value="{!file.LastModifiedDateTimestamp}" year="numeric" month="numeric" day="numeric" hour="numeric" minute="numeric"/>
-								</div>
-                            </td>
-                            <td data-label="Size" class="slds-cell-wrap">
-                                <div title="{!file.HumanReadableContentSize}">{!file.HumanReadableContentSize}</div>
-                            </td>
-                        </tr>
-                    </aura:iteration>
-
-                </tbody>
-            </table>
-
-        </div>
-
-    </div>
+    </lightning:card>
 
 </aura:component>
 <!--

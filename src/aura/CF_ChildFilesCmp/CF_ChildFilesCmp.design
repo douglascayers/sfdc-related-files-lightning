@@ -10,6 +10,11 @@ License: BSD 3-Clause License
                       label="Child Relationships"
                       description="Comma-separated list of child relationship API names whose related files to show. For example, 'Contacts' to show files belonging to records in contact related list, or 'Invoices__r' to show files belonging to records in custom invoice related list."/>
 
+    <design:attribute name="componentCardTitle"
+                      label="Title"
+                      default="Related Files"
+                      description="Title of the component on the page."/>
+
 </design:component>
 <!--
 BSD 3-Clause License

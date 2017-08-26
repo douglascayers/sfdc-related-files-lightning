@@ -29,9 +29,13 @@ public with sharing class CF_ChildFilesController {
 
         System.debug( 'query=' + recordIdsQuery );
 
-        List<SObject> records = Database.query( recordIdsQuery );
+        Set<ID> entityIds = new Set<ID>();
 
-        if ( records.size() > 0 ) {
+        for ( SObject record : Database.query( recordIdsQuery ) ) {
+            entityIds.add( record.id );
+        }
+
+        if ( entityIds.size() > 0 ) {
 
             String query =
                 ' SELECT ' +
@@ -43,12 +47,13 @@ public with sharing class CF_ChildFilesController {
                     ' ContentDocument.LatestPublishedVersion.ContentSize, ' +
                     ' ContentDocument.LatestPublishedVersion.PathOnClient, ' +
                     ' ContentDocument.LatestPublishedVersion.FileExtension, ' +
+                    ' ContentDocument.LatestPublishedVersion.FileType, ' +
                     ' ContentDocument.LatestPublishedVersion.CreatedDate, ' +
                     ' ContentDocument.LatestPublishedVersion.LastModifiedDate ' +
                 ' FROM ' +
                     ' ContentDocumentLink ' +
                 ' WHERE ' +
-                    ' LinkedEntityId IN :records ';
+                    ' LinkedEntityId IN :entityIds ';
 
             System.debug( 'query=' + query );
 
@@ -82,6 +87,8 @@ public with sharing class CF_ChildFilesController {
                     'HumanReadableContentSize' => getHumanReadableByteCount( wrapper.file.ContentSize ),
                     'PathOnClient' => wrapper.file.PathOnClient,
                     'FileExtension' => wrapper.file.FileExtension,
+                    'FileType' => wrapper.file.FileType,
+                    'FileTypeIconName' => 'doctype:attachment',
                     'CreatedDate' => wrapper.file.CreatedDate,
                     'CreatedDateTimestamp' => wrapper.file.CreatedDate.getTime(),
                     'LastModifiedDate' => wrapper.file.LastModifiedDate,
