@@ -1,7 +1,7 @@
 /*
 Author: Doug Ayers
 Website: https://douglascayers.com
-GitHub: https://github.com/DouglasCAyers/sfdc-child-files-lightning
+GitHub: https://github.com/DouglasCAyers/sfdc-related-files-lightning
 License: BSD 3-Clause License
 */
 public with sharing class CF_ChildFilesController {
