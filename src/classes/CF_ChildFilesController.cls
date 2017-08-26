@@ -19,18 +19,19 @@ public with sharing class CF_ChildFilesController {
 
         List<Map<String, Object>> files = new List<Map<String, Object>>();
 
+        // Not all objects (namely Task and Event) support sub-queries
+        // so we first query for the related record ids then bind them
+        // into next query on ContentDocumentLink.
         String recordIdsQuery = String.format(
             'SELECT id FROM {0} WHERE {1} = {2}',
             new String[] { String.escapeSingleQuotes( objectName ), String.escapeSingleQuotes( fieldName ), quote( fieldvalue ) }
         );
 
-        Set<ID> entityIds = new Set<ID>();
+        System.debug( 'query=' + recordIdsQuery );
 
-        for ( SObject record : Database.query( recordIdsQuery ) ) {
-            entityIds.add( record.id );
-        }
+        List<SObject> records = Database.query( recordIdsQuery );
 
-        if ( entityIds.size() > 0 ) {
+        if ( records.size() > 0 ) {
 
             String query =
                 ' SELECT ' +
@@ -47,8 +48,7 @@ public with sharing class CF_ChildFilesController {
                 ' FROM ' +
                     ' ContentDocumentLink ' +
                 ' WHERE ' +
-                    ' LinkedEntityId IN :entityIds ' +
-                ' LIMIT 100 ';
+                    ' LinkedEntityId IN :records ';
 
             System.debug( 'query=' + query );
 
@@ -68,6 +68,9 @@ public with sharing class CF_ChildFilesController {
             }
             wrappers.sort();
 
+            // I want to send back custom data along with the sobject, but I also
+            // don't want to create another helper class since we only need this structure
+            // when serializing the data back to our Lightning Component, so just using a map.
             for ( ContentVersionWrapper wrapper : wrappers ) {
                 files.add( new Map<String, Object>{
                     'Id' => wrapper.file.Id,
@@ -144,7 +147,23 @@ public with sharing class CF_ChildFilesController {
                 Long thisFileLastModifiedTime = ( thisLastModifiedDate != null ? thisLastModifiedDate.getTime() : 0 );
                 Long thatFileLastModifiedTime = ( thatLastModifiedDate != null ? thatLastModifiedDate.getTime() : 0 );
 
-                value = ( thatFileLastModifiedTime - thisFileLastModifiedTime ).intValue(); // sort descending
+                // =======================================================================
+                // WARNING:
+                //      Do not downgrade the Long compare result to Integer.
+                //      You will lose precision and yield an incorrect number.
+                //      Therefore if the compare result is negative/positive/zero
+                //      we simply return -1/+1/0 to indicate which record sorts first.
+                // =======================================================================
+
+                Long compareResult = ( thatFileLastModifiedTime - thisFileLastModifiedTime ); // sort descending
+
+                if ( compareResult < 0 ) {
+                    return -1;
+                } else if ( compareResult > 0 ) {
+                    return 1;
+                } else {
+                    return 0;
+                }
 
             }
 
@@ -196,6 +215,9 @@ public with sharing class CF_ChildFilesController {
 
             if ( String.isNotBlank( relationship.getRelationshipName() ) && fileLinkableObjectNames.contains( objectDescribe.getName() ) ) {
 
+                // unfortunately, apex describe info cannot get the relationship's user-friendly label
+                // we only have the API name or the plural name of the object, but not what the related list is labeled
+                // https://salesforce.stackexchange.com/questions/9140/access-the-related-list-label-for-a-lookup-relationship
                 describeMaps.put( relationship.getRelationshipName(), new Map<String, Object>{
                     'relationshipName' => relationship.getRelationshipName(),
                     'fieldName' => fieldDescribe.getName(),
