@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
-        <members>*</members>
+        <members>CF_ChildFilesController</members>
+        <members>CF_ChildFilesControllerTest</members>
         <name>ApexClass</name>
     </types>
     <types>
-        <members>*</members>
-        <name>ApexPage</name>
+        <members>CF_ChildFilesCmp</members>
+        <name>AuraDefinitionBundle</name>
     </types>
     <version>40.0</version>
 </Package>
