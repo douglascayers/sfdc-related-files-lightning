@@ -29,20 +29,20 @@ License: BSD 3-Clause License
 
     <aura:attribute name="childRelationshipFiles"
                     type="Object[]"
-                    description=""/>
+                    description="Array of wrapper objects that denote the child relationship name, describe info, and list of shared files. The main content that is displayed in this component."/>
 
     <aura:attribute name="selectedIndex"
                     type="Integer"
                     default="0"
-                    description=""/>
+                    description="Index in 'childRelationshipFiles' array of the selected relationship. Indicates which relationship is highlighted as active in the vertical nav list."/>
 
     <aura:attribute name="selectedFiles"
                     type="Object[]"
-                    description=""/>
+                    description="Array of files shared to records of the selected relationship. These are the files displayed in the component."/>
 
     <aura:attribute name="selectedRelationship"
                     type="Object"
-                    description=""/>
+                    description="Element in 'childRelationshipFiles' at the selected index."/>
 
     <!-- Events -->
 
@@ -59,7 +59,7 @@ License: BSD 3-Clause License
 
             <div class="slds-col slds-size_1-of-4 slds-m-right_small slds-p-right_small slds-border_right">
 
-                <nav class="slds-nav-vertical" aria-label="Relationships">
+                <nav class="slds-nav-vertical" aria-label="{!v.componentCardTitle}">
                     <div class="slds-nav-vertical__section">
                         <ul>
                             <aura:iteration var="relationship" items="{!v.childRelationshipFiles}" indexVar="index">
