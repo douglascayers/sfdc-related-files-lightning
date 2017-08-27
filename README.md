@@ -24,11 +24,6 @@ Community Requests
 
 However, this "rollup" of Classic Attachments is a much beloved feature and customers are asking for it in Lightning Experience.
 
-After [sharing a sneak peek](https://twitter.com/DouglasCAyers/status/900277146668728320) on Twitter, [Haris Ikram](https://twitter.com/HarisIkramH), Product Manager for Salesforce,
-commented that a solution is in demand and happy to share this with the Salesforce Lightning Team. 
-
-[![screen shot](images/haris-ikram.png)](https://twitter.com/HarisIkramH/status/901074270524104704)
-
 [Keri-An Richards](https://www.linkedin.com/in/keri-an-richards-44270810/) took to the IdeaExchange and submitted
 [Roll up display of Notes and Attachments in Lightning as it was in Classic](https://success.salesforce.com/ideaView?id=08730000000cHYhAAM).
 
@@ -42,12 +37,17 @@ have also inquired on the Success Community how to get this rollup feature in Li
 
 [![screen shot](images/hilary-henderson.png)](https://success.salesforce.com/_ui/core/chatter/groups/GroupProfilePage?g=0F93A0000009SE1&fId=0D53A00003Bs5Tk)
 
+Seeing a need I began developing this app. After [sharing a sneak peek](https://twitter.com/DouglasCAyers/status/900277146668728320) on Twitter,
+[Haris Ikram](https://twitter.com/HarisIkramH), Product Manager for Salesforce, commented that such a solution is in demand and happy to share this with the Salesforce Lightning Team. 
+
+[![screen shot](images/haris-ikram.png)](https://twitter.com/HarisIkramH/status/901074270524104704)
+
 ---
 
 Packaged Release History
 ------------------------
 
-Release 1.0
+Release 1.0 (current release)
 -----------
 * Install package
   * [Production URL](https://login.salesforce.com/packaging/installPackage.apexp?p0=)
