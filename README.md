@@ -52,8 +52,8 @@ Packaged Release History
 Release 1.0 (current release)
 -----------
 * Install package
-  * [Production URL](https://login.salesforce.com/packaging/installPackage.apexp?p0=)
-  * [Sandbox URL](https://test.salesforce.com/packaging/installPackage.apexp?p0=)
+  * [Production URL](https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1I000000h81H)
+  * [Sandbox URL](https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1I000000h81H)
 * Initial managed package offering
 * Shows all files, grouped by object, accessible by the user that are shared to related child records of the parent record.
 
