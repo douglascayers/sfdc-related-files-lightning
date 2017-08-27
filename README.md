@@ -134,7 +134,7 @@ This component only works with Lightning Files, if you are still using Classic A
 
 ---
 
-Diclaimer
+Disclaimer
 =========
 
 I have only tested this in a Developer Edition org with a few hundred related records and files off one account.
