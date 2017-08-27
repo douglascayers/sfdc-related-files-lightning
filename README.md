@@ -69,9 +69,11 @@ You may install the unmanaged code from GitHub and make any desired adjustments.
 Getting Started
 ---------------
 
-1. Add the [Files related list](https://releasenotes.docs.salesforce.com/en-us/winter16/release-notes/rn_chatter_files_related_list.htm) to your Page Layouts ([Trailhead Module](https://trailhead.salesforce.com/en/modules/lex_customization/units/lex_customization_page_layouts))
+1. Setup [My Domain](https://help.salesforce.com/articleView?id=domain_name_overview.htm&type=0). My Domain is required to use Lightning Components.
 
-2. Add the **Related Files** custom Lightning Component to your Lightning Record Pages ([Trailhead Module](https://trailhead.salesforce.com/en/modules/lightning_app_builder/units/lightning_app_builder_recordpage))
+2. Add the [Files related list](https://releasenotes.docs.salesforce.com/en-us/winter16/release-notes/rn_chatter_files_related_list.htm) to your Page Layouts ([Trailhead Module](https://trailhead.salesforce.com/en/modules/lex_customization/units/lex_customization_page_layouts))
+
+3. Add the **Related Files** custom Lightning Component to your Lightning Record Pages ([Trailhead Module](https://trailhead.salesforce.com/en/modules/lightning_app_builder/units/lightning_app_builder_recordpage))
 
 Check out this 7 minute setup and how-to video:
 
