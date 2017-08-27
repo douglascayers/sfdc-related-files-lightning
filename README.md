@@ -3,10 +3,12 @@ View Salesforce Files of Related Records
 
 See files shared to all related records on one page in Lightning.
 
+This project provides a Lightning Component you can drag on to your Lightning Record Pages in App Builder.
+
 ![screen shot](images/related-files-example.png)
 
-Overview
---------
+Background
+----------
 
 As of Summer '17 release, Lightning Files related list behaves fundamentally different than Classic Notes & Attachments related list
 when it comes to showing files and attachments shared to not only to the current record but also shared to related child records.
@@ -55,7 +57,6 @@ Release 1.0 (current release)
 * Initial managed package offering
 * Shows all files, grouped by object, accessible by the user that are shared to related child records of the parent record.
 
-
 Installing the Source Code (Developers)
 ---------------------------------------
 
@@ -72,18 +73,22 @@ Getting Started
 
 2. Add the **Related Files** custom Lightning Component to your Lightning Record Pages ([Trailhead Module](https://trailhead.salesforce.com/en/modules/lightning_app_builder/units/lightning_app_builder_recordpage))
 
+Check out this 7 minute setup and how-to video:
+
+[![screen shot](images/youtube-cover.png)](https://www.youtube.com/watch?v=14CyPXDxHNI)
+
 Recommendations
 ---------------
 
 * This component only works with Lightning Files, if you are still using Classic Attachments then I recommend that you [migrate them](https://github.com/DouglasCAyers/sfdc-convert-attachments-to-chatter-files).
 * Add a new tab on your Record Pages labeled "Files" then add the standard `Related List` component (configured to show the **Files** related list) and my custom `Related Files` component.
 
-// TODO add screen shot and link to YouTube video
-
 ---
 
 FAQ
 ===
+
+If one of your questions isn't answered below, please search and comment on [existing issues](/issues?utf8=%E2%9C%93&q=is%3Aissue) before opening a new one. Thanks! 
 
 Which files are shown in the Lightning Component?
 -------------------------------------------------
@@ -101,8 +106,14 @@ I don't see Attachments from related records like in Classic, what gives?
 
 This component only works with Lightning Files, if you are still using Classic Attachments then I recommend that you [migrate them](https://github.com/DouglasCAyers/sfdc-convert-attachments-to-chatter-files).
 
-
 ---
+
+Diclaimer
+=========
+
+I have only tested this in a Developer Edition org with a few hundred related records and files off one account.
+If you have a much larger org with thousands of related records and files, please let me know how performance is
+so I can make any adjustments if needed. Thanks!
 
 Credits
 =======
