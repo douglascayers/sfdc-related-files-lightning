@@ -100,6 +100,32 @@ For example, if viewing an account then the component could show you all files s
 As a System Administrator, you may customize which related lists are visible in this component.
 By default, all relationships accessible by the current user are displayed in the vertical navigation.
 
+How do I customize which related lists are shown in the vertical navigation?
+----------------------------------------------------------------------------
+
+In App Builder when editing the Record Page you added the **Related Files** lightning component,
+there is a customization attribute named **Child Relationships**.
+Enter a comma-delimited list of the API name(s) of the child relationships as defined on the lookup field on the child object.
+
+For example, if on the Account page you wanted this component to show only files for Contacts and a custom object Invoice__c,
+you might enter "`Contacts,Invoices__r`".
+
+To determine a child relationship name, in Setup use Object Manager to navigate to your child object (e.g. Contact or Invoice__c)
+then navigate to the lookup field that points to the parent object (that is the object whose Lightning Record Page you're adding this component).
+On the field's detail page you'll see the field label, field name, and the child relationship name (use this value in App Bulider).
+
+![screen shot](images/setup-child-relationship-field-name.png)
+
+What do the badge counts mean in the vertical navigation?
+---------------------------------------------------------
+
+The badge count is the number of **unique files** shared to those related records.
+
+For example, if the single file "Hello.txt" is shared to 3 contacts related to the same account then
+when viewing this **Related Files** lightning component on that account page would display the badge count 1
+for the `Contacts` relationship even though 3 contacts exist because only 1 unique file was shared among them.
+
+![screen shot](images/related-files-badge-counts.png)
 
 I don't see Attachments from related records like in Classic, what gives?
 -------------------------------------------------------------------------
