@@ -132,6 +132,16 @@ I don't see Attachments from related records like in Classic, what gives?
 
 This component only works with Lightning Files, if you are still using Classic Attachments then I recommend that you [migrate them](https://github.com/DouglasCAyers/sfdc-convert-attachments-to-chatter-files).
 
+Why is a child relationship name listed multiple times in the vertical navigation?
+-----------------------------------------------------------------------------------
+
+See issue [Use Actual Related List Labels](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/1).
+
+Why do the child relationship labels in the vertical navigation not match the labels of the related lists on the page layout?
+-----------------------------------------------------------------------------------------------------------------------------
+
+See issue [Use Actual Related List Labels](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/1).
+
 ---
 
 Disclaimer
