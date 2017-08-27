@@ -55,7 +55,7 @@ License: BSD 3-Clause License
     <lightning:spinner aura:id="init-spinner" variant="brand"/>
     <lightning:spinner aura:id="spinner" variant="brand"/>
 
-    <lightning:card iconName="standard:file" title="{!v.componentCardTitle}">
+    <lightning:card iconName="{!( empty(v.componentCardTitle) ? '' : 'standard:file' )}" title="{!v.componentCardTitle}">
 
         <div class="slds-grid">
 
