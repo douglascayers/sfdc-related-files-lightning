@@ -17,10 +17,6 @@ License: BSD 3-Clause License
 
             return objectDescribe;
 
-        })).catch( $A.getCallback( function( errors ) {
-
-            helper.logActionErrors( component, errors );
-
         }));
 
     },
@@ -39,14 +35,6 @@ License: BSD 3-Clause License
         }
 
         return Promise.all( promises )
-            .catch( function( err ) {
-                $A.get("e.force:showToast").setParams({
-                    'title' : 'Error loading files',
-                    'message' : err,
-                    'type' : 'error',
-                    'mode': 'sticky'
-                }).fire();
-            })
             .then( function() {
                 $A.util.addClass( component.find( 'init-spinner' ), 'slds-hide' );
             });
@@ -61,11 +49,11 @@ License: BSD 3-Clause License
         var objectDescribe = component.get( 'v.sObjectDescribe' );
         var childRelationshipFiles = component.get( 'v.childRelationshipFiles' );
 
-		var name = childRelationshipFiles[index].name;
-        var objectName = objectDescribe.childRelationships[name].objectName;
-        var fieldName = objectDescribe.childRelationships[name].fieldName;
+		var relationshipName = childRelationshipFiles[index].name;
+        var objectName = objectDescribe.childRelationships[relationshipName].objectName;
+        var fieldName = objectDescribe.childRelationships[relationshipName].fieldName;
 
-        return helper.getRelatedFilesAsync( component, objectName, fieldName, recordId, runInBackground )
+        return helper.getRelatedFilesAsync( component, relationshipName, objectName, fieldName, recordId, runInBackground )
         	.then( $A.getCallback( function( response ) {
 
 	            var childRelationshipFiles = component.get( 'v.childRelationshipFiles' );
@@ -89,12 +77,13 @@ License: BSD 3-Clause License
 
     },
 
-    getRelatedFilesAsync : function( component, objectName, fieldName, fieldValue, background ) {
+    getRelatedFilesAsync : function( component, relationshipName, objectName, fieldName, fieldValue, background ) {
 
         var helper = this;
 
         return helper.enqueueAction( component, 'c.getRelatedFiles', {
 
+            'relationshipName' : relationshipName,
             'objectName' : objectName,
             'fieldName' : fieldName,
             'fieldValue' : fieldValue
@@ -109,10 +98,6 @@ License: BSD 3-Clause License
             return {
                 'files' : files
             };
-
-        })).catch( $A.getCallback( function( errors ) {
-
-            helper.logActionErrors( component, errors );
 
         }));
 
@@ -298,6 +283,8 @@ License: BSD 3-Clause License
 
                     console.error( 'Error calling action "' + actionName + '" with state: ' + response.getState() );
 
+                    helper.logActionErrors( response.getError() );
+
                     reject( response.getError() );
 
                 }
@@ -310,7 +297,7 @@ License: BSD 3-Clause License
         return p;
     },
 
-    logActionErrors : function( component, errors ) {
+    logActionErrors : function( errors ) {
         if ( errors ) {
             if ( errors.length > 0 ) {
                 for ( var i = 0; i < errors.length; i++ ) {

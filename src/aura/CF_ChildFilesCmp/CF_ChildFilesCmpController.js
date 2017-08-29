@@ -51,7 +51,16 @@ License: BSD 3-Clause License
 
                 component.set( 'v.childRelationshipFiles', childRelationshipFiles );
 
-                helper.loadAllChildRelationshipFilesAsync( component );
+                return helper.loadAllChildRelationshipFilesAsync( component );
+
+            })).catch( $A.getCallback( function( err ) {
+
+               $A.get( 'e.force:showToast' ).setParams({
+                   'title' : 'Sorry, error initializing component',
+                   'message' : err,
+                   'type' : 'error',
+                   'mode': 'sticky'
+               }).fire();
 
             }));
 
@@ -71,7 +80,17 @@ License: BSD 3-Clause License
         component.set( 'v.selectedIndex', clickedIndex );
         component.set( 'v.selectedRelationship', childRelationshipFiles[clickedIndex] );
 
-        helper.getRelatedFilesForIndexAsync( component, clickedIndex, false );
+        helper.getRelatedFilesForIndexAsync( component, clickedIndex, false )
+            .catch( $A.getCallback( function( err ) {
+
+               $A.get( 'e.force:showToast' ).setParams({
+                   'title' : 'Sorry, error getting files',
+                   'message' : err,
+                   'type' : 'error',
+                   'mode': 'sticky'
+               }).fire();
+
+            }));
 
     },
 
