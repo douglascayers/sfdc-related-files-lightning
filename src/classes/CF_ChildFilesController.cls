@@ -263,13 +263,6 @@ public with sharing class CF_ChildFilesController {
             DescribeSObjectResult objectDescribe = relationship.getChildSObject().getDescribe();
             DescribeFieldResult fieldDescribe = relationship.getField().getDescribe();
 
-            if ( objectDescribe.getSObjectType() == LookedUpFromActivity.SObjectType ) {
-                System.debug( relationship.getRelationshipName() );
-                System.debug( relationship );
-                System.debug( objectDescribe );
-                System.debug( fieldDescribe );
-            }
-
             if ( String.isNotBlank( relationship.getRelationshipName() ) && fileLinkableObjectNames.contains( objectDescribe.getName() ) ) {
 
                 // unfortunately, apex describe info cannot get the relationship's user-friendly label
