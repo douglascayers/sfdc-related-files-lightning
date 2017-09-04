@@ -268,7 +268,7 @@ public with sharing class CF_ChildFilesController {
                 // unfortunately, apex describe info cannot get the relationship's user-friendly label
                 // we only have the API name or the plural name of the object, but not what the related list is labeled
                 // https://salesforce.stackexchange.com/questions/9140/access-the-related-list-label-for-a-lookup-relationship
-                describeMaps.put( relationship.getRelationshipName(), new Map<String, Object>{
+                describeMaps.put( relationship.getRelationshipName().toUpperCase(), new Map<String, Object>{
                     'relationshipName' => relationship.getRelationshipName(),
                     'fieldName' => fieldDescribe.getName(),
                     'fieldLabel' => fieldDescribe.getLabel(),

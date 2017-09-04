@@ -31,7 +31,7 @@ License: BSD 3-Clause License
 
                     for ( var i = 0; i < childRelationshipNames.length; i++ ) {
 
-                        var relationshipName = childRelationshipNames[i].trim();
+                        var relationshipName = childRelationshipNames[i].trim().toUpperCase();
                         var isSelected = ( i == selectedIndex );
 
                         childRelationshipFiles[i] = {
