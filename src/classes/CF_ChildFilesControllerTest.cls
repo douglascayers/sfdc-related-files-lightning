@@ -8,6 +8,53 @@ License: BSD 3-Clause License
 private class CF_ChildFilesControllerTest {
 
     @IsTest
+    static void test_get_related_files_by_looked_up_activity() {
+
+        Account acct = new Account(
+            name = 'Test Account'
+        );
+
+        insert acct;
+
+        Task tsk = new Task(
+            whatId = acct.id,
+            subject = 'Test Task',
+            activityDate = Date.today()
+        );
+
+        insert tsk;
+
+        List<Map<String, Object>> relatedFiles = null;
+
+        Test.startTest();
+
+        relatedFiles = CF_ChildFilesController.getRelatedFiles( 'Tasks', 'LookedUpFromActivity', 'AccountId', acct.id );
+        System.assertEquals( 0, relatedFiles.size() );
+
+        ContentVersion newFile1 = new ContentVersion(
+                title = 'Test File',
+                pathOnClient = 'Test File.txt',
+                versionData = Blob.valueOf( 'Test' ),
+                firstPublishLocationId = tsk.id
+        );
+
+        ContentVersion newFile2 = new ContentVersion(
+                title = 'Test File 2',
+                pathOnClient = 'Test File 2.txt',
+                versionData = Blob.valueOf( 'Test 2' ),
+                firstPublishLocationId = tsk.id
+        );
+
+        insert new ContentVersion[] { newFile1, newFile2 };
+
+        relatedFiles = CF_ChildFilesController.getRelatedFiles( 'Tasks', 'LookedUpFromActivity', 'AccountId', acct.id );
+        System.assertEquals( 2, relatedFiles.size() );
+
+        Test.stopTest();
+
+    }
+
+    @IsTest
     static void test_get_related_files() {
 
         Account acct = new Account(

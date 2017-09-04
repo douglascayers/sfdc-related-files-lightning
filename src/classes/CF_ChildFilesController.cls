@@ -118,7 +118,7 @@ public with sharing class CF_ChildFilesController {
 
             for ( List<SObject> records : Database.query( recordIdsQuery ) ) {
                 for ( SObject record : records ) {
-                    for ( LookedUpFromActivity activity : record.getSObjects( relationshipName ) ) {
+                    for ( SObject activity : record.getSObjects( relationshipName ) ) {
                         entityIds.add( activity.id );
                     }
                 }
