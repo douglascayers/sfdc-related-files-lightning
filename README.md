@@ -105,6 +105,8 @@ Files shared to child records that the user has access to.
 A child record is any record found in one of the **related lists** of the main record being viewed.
 For example, if viewing an account then the component could show you all files shared to contacts, cases, opportunities, etc. belonging to that account.
 
+Specifically when viewing an account, files related to tasks and events that are related to child records of an account do rollup and are visible at the account level. This is possible because of the standard `Task.AccountId` and `Event.AccountId` fields and Salesforce populating them for account rollup behaviors.
+
 As a System Administrator, you may customize which related lists are visible in this component.
 By default, all relationships accessible by the current user are displayed in the vertical navigation.
 
@@ -115,10 +117,10 @@ In App Builder when editing the Record Page you added the **Related Files** ligh
 there is a customization attribute named **Child Relationships**.
 Enter a comma-delimited list of the API name(s) of the child relationships as defined on the lookup field on the child object.
 
-For example, if on the Account page you wanted this component to show only files for Contacts and a custom object Invoice__c,
+For example, if on the Account page you wanted this component to show only files for Contacts and a custom object `Invoice__c`,
 you might enter "`Contacts,Invoices__r`".
 
-To determine a child relationship name, in Setup use Object Manager to navigate to your child object (e.g. Contact or Invoice__c)
+To determine a child relationship name, in Setup use Object Manager to navigate to your child object (e.g. `Contact` or `Invoice__c`)
 then navigate to the lookup field that points to the parent object (that is the object whose Lightning Record Page you're adding this component).
 On the field's detail page you'll see the field label, field name, and the child relationship name (use this value in App Bulider).
 
@@ -162,7 +164,7 @@ so I can make any adjustments if needed. Thanks!
 Credits
 =======
 
-The Related Files Lightning Component is developed and maintained by [Doug Ayers](https://douglascayers.com).
+[Doug Ayers](https://douglascayers.com) develops and maintains the project.
 
 License
 =======
