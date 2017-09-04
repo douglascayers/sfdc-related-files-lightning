@@ -107,11 +107,16 @@ public with sharing class CF_ChildFilesController {
 
         Set<ID> entityIds = new Set<ID>();
 
+        SObjectType fieldValueSObjectType = ID.valueOf( fieldValue ).getSobjectType();
+        Boolean fieldIsAccount = ( Account.SObjectType == fieldValueSObjectType );
+        Boolean objectIsTask = ( 'Task' == objectName );
+        Boolean objectIsEvent = ( 'Event' == objectName );
+
         if ( 'LookedUpFromActivity' == objectName ) {
 
             String recordIdsQuery = String.format(
                 'SELECT id, ( SELECT id FROM {0} ORDER BY ActivityDate DESC, LastModifiedDate DESC LIMIT 500 ) FROM {1} WHERE id = {2}',
-                new String[] { String.escapeSingleQuotes( relationshipName ), ID.valueOf( fieldValue ).getSobjectType().getDescribe().getName(), quote( fieldValue ) }
+                new String[] { String.escapeSingleQuotes( relationshipName ), fieldValueSObjectType.getDescribe().getName(), quote( fieldValue ) }
             );
 
             System.debug( 'recordIdsQuery=' + recordIdsQuery );
@@ -125,6 +130,12 @@ public with sharing class CF_ChildFilesController {
             }
 
         } else {
+
+            // if querying tasks/events on an account then widen our query
+            // to find any related task/event that rolls up to this account
+            if ( fieldIsAccount && ( objectIsTask || objectIsEvent ) ) {
+                fieldName = 'AccountId';
+            }
 
             String recordIdsQuery = String.format(
                 'SELECT id FROM {0} WHERE {1} = {2} LIMIT 10000',
