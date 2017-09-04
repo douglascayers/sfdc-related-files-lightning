@@ -68,7 +68,7 @@ License: BSD 3-Clause License
 
     handleChildRelationshipClick : function( component, event, helper ) {
 
-		var childRelationshipFiles = component.get( 'v.childRelationshipFiles' );
+        var childRelationshipFiles = component.get( 'v.childRelationshipFiles' );
         var selectedIndex = component.get( 'v.selectedIndex' );
         var clickedIndex = event.currentTarget.getAttribute( 'data-index' );
 
@@ -98,10 +98,10 @@ License: BSD 3-Clause License
 
         var clickedFileId = event.srcElement.getAttribute( 'data-fileId' );
 
-		$A.get( 'e.lightning:openFiles' ).fire({
+        $A.get( 'e.lightning:openFiles' ).fire({
             recordIds : component.get( 'v.selectedFiles' ).map( function( file ) { return file.ContentDocumentId; } ),
             selectedRecordId : clickedFileId
-    	});
+        });
 
     },
 

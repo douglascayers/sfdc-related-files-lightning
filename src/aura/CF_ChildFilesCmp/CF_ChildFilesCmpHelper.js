@@ -49,31 +49,31 @@ License: BSD 3-Clause License
         var objectDescribe = component.get( 'v.sObjectDescribe' );
         var childRelationshipFiles = component.get( 'v.childRelationshipFiles' );
 
-		var relationshipName = childRelationshipFiles[index].name;
+        var relationshipName = childRelationshipFiles[index].name;
         var objectName = objectDescribe.childRelationships[relationshipName].objectName;
         var fieldName = objectDescribe.childRelationships[relationshipName].fieldName;
 
         return helper.getRelatedFilesAsync( component, relationshipName, objectName, fieldName, recordId, runInBackground )
-        	.then( $A.getCallback( function( response ) {
+            .then( $A.getCallback( function( response ) {
 
-	            var childRelationshipFiles = component.get( 'v.childRelationshipFiles' );
+                var childRelationshipFiles = component.get( 'v.childRelationshipFiles' );
                 var selectedIndex = component.get( 'v.selectedIndex' );
 
                 helper.applyFileTypeIconNames( component, response.files );
 
-	            childRelationshipFiles[index].files = response.files;
+                childRelationshipFiles[index].files = response.files;
                 childRelationshipFiles[index].selected = ( selectedIndex == index );
 
-    	        if ( selectedIndex == index ) {
-	                component.set( 'v.selectedFiles', response.files );
-	                component.set( 'v.selectedRelationship', childRelationshipFiles[selectedIndex] );
-	            }
+                if ( selectedIndex == index ) {
+                    component.set( 'v.selectedFiles', response.files );
+                    component.set( 'v.selectedRelationship', childRelationshipFiles[selectedIndex] );
+                }
 
-				component.set( 'v.childRelationshipFiles', childRelationshipFiles );
+                component.set( 'v.childRelationshipFiles', childRelationshipFiles );
 
                 return response;
 
-        	}));
+            }));
 
     },
 
