@@ -28,7 +28,7 @@ private class CF_ChildFilesControllerTest {
 
         Test.startTest();
 
-        relatedFiles = CF_ChildFilesController.getRelatedFiles( 'Contact', 'AccountId', acct.id );
+        relatedFiles = CF_ChildFilesController.getRelatedFiles( 'Contacts', 'Contact', 'AccountId', acct.id );
         System.assertEquals( 0, relatedFiles.size() );
 
         ContentVersion newFile1 = new ContentVersion(
@@ -47,7 +47,7 @@ private class CF_ChildFilesControllerTest {
 
         insert new ContentVersion[] { newFile1, newFile2 };
 
-        relatedFiles = CF_ChildFilesController.getRelatedFiles( 'Contact', 'AccountId', acct.id );
+        relatedFiles = CF_ChildFilesController.getRelatedFiles( 'Contacts', 'Contact', 'AccountId', acct.id );
         System.assertEquals( 2, relatedFiles.size() );
 
         Test.stopTest();
