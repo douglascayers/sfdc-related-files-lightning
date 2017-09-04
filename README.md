@@ -49,11 +49,17 @@ Seeing a need I began developing this app. After [sharing a sneak peek](https://
 Packaged Release History
 ------------------------
 
-Release 1.0 (current release)
+Release 1.1 (current release)
 -----------
 * Install package
-  * [Production URL](https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1I000000h81H)
-  * [Sandbox URL](https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1I000000h81H)
+  * [Production URL](https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1I000000h81M)
+  * [Sandbox URL](https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1I000000h81M)
+* Add support for custom lookup fields on Activities ([issue 2](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/2))
+* For Account records, files related to Tasks and Events that rollup to an Account are included (e.g. `Task.AccountId`, `Event.AccountId`) ([issue 3](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/3)) 
+* Child relationships are now case-insensitive in App Builder ([issue 5](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/5))
+
+Release 1.0 (current release)
+-----------
 * Initial managed package offering
 * Shows all files, grouped by object, accessible by the user that are shared to related child records of the parent record.
 
