@@ -11,29 +11,15 @@ public with sharing class CF_ChildFilesController {
      * on the given object name where the field name equals the field value.
      *
      * Example:
-     *      Calling getFiles( 'Contact', 'AccountId', '001f4000005YzSiAAK' )
+     *      Calling getFiles( 'Contacts', 'Contact', 'AccountId', '001f4000005YzSiAAK' )
      *      returns files shared to contacts belonging to this account.
      */
     @AuraEnabled
-    public static List<Map<String, Object>> getRelatedFiles( String objectName, String fieldName, String fieldValue ) {
+    public static List<Map<String, Object>> getRelatedFiles( String relationshipName, String objectName, String fieldName, String fieldValue ) {
 
         List<Map<String, Object>> files = new List<Map<String, Object>>();
 
-        // Not all objects (namely Task and Event) support sub-queries
-        // so we first query for the related record ids then bind them
-        // into next query on ContentDocumentLink.
-        String recordIdsQuery = String.format(
-            'SELECT id FROM {0} WHERE {1} = {2}',
-            new String[] { String.escapeSingleQuotes( objectName ), String.escapeSingleQuotes( fieldName ), quote( fieldvalue ) }
-        );
-
-        System.debug( 'query=' + recordIdsQuery );
-
-        Set<ID> entityIds = new Set<ID>();
-
-        for ( SObject record : Database.query( recordIdsQuery ) ) {
-            entityIds.add( record.id );
-        }
+        Set<ID> entityIds = queryForEntityIds( relationshipName, objectName, fieldName, fieldValue );
 
         if ( entityIds.size() > 0 ) {
 
@@ -99,6 +85,74 @@ public with sharing class CF_ChildFilesController {
         }
 
         return files;
+    }
+
+    private static Set<ID> queryForEntityIds( String relationshipName, String objectName, String fieldName, String fieldValue ) {
+
+        System.debug( 'querying entity ids: relationshipName=' + relationshipName + ', objectName=' + objectName + ', fieldName=' + fieldName + ', fieldValue=' + fieldValue );
+
+        // Tasks/Event/Activity are strange objects in Salesforce
+        // and have very peculiar query restrictions.
+        //
+        // For custom lookup fields on Activity object the relationship created
+        // is not queryable directly. In fact the data is kept in a special LookedUpFromActivity object.
+        // Per documentation we must perform a sub-query on child relationship to get the activities.
+        // https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_lookedupfromactivity.htm
+        //
+        // Ironically, for standard lookup fields on Tasks and Events those child relationships
+        // are queryable directly but do not allow sub-queries. Ay yi yi...
+        //
+        // To handle these scenarios the code makes different queries and retrieves
+        // the record ids in memory. Not even close to ideal but best I know how to do in synchronous solution.
+
+        Set<ID> entityIds = new Set<ID>();
+
+        SObjectType fieldValueSObjectType = ID.valueOf( fieldValue ).getSobjectType();
+        Boolean fieldIsAccount = ( Account.SObjectType == fieldValueSObjectType );
+        Boolean objectIsTask = ( 'Task' == objectName );
+        Boolean objectIsEvent = ( 'Event' == objectName );
+
+        if ( 'LookedUpFromActivity' == objectName ) {
+
+            String recordIdsQuery = String.format(
+                'SELECT id, ( SELECT id FROM {0} ORDER BY ActivityDate DESC, LastModifiedDate DESC LIMIT 500 ) FROM {1} WHERE id = {2}',
+                new String[] { String.escapeSingleQuotes( relationshipName ), fieldValueSObjectType.getDescribe().getName(), quote( fieldValue ) }
+            );
+
+            System.debug( 'recordIdsQuery=' + recordIdsQuery );
+
+            for ( List<SObject> records : Database.query( recordIdsQuery ) ) {
+                for ( SObject record : records ) {
+                    for ( SObject activity : record.getSObjects( relationshipName ) ) {
+                        entityIds.add( activity.id );
+                    }
+                }
+            }
+
+        } else {
+
+            // if querying tasks/events on an account then widen our query
+            // to find any related task/event that rolls up to this account
+            if ( fieldIsAccount && ( objectIsTask || objectIsEvent ) ) {
+                fieldName = 'AccountId';
+            }
+
+            String recordIdsQuery = String.format(
+                'SELECT id FROM {0} WHERE {1} = {2} LIMIT 10000',
+                new String[] { String.escapeSingleQuotes( objectName ), String.escapeSingleQuotes( fieldName ), quote( fieldvalue ) }
+            );
+
+            System.debug( 'recordIdsQuery=' + recordIdsQuery );
+
+            for ( List<SObject> records : Database.query( recordIdsQuery ) ) {
+                for ( SObject record : records ) {
+                    entityIds.add( record.id );
+                }
+            }
+
+        }
+
+        return entityIds;
     }
 
     /**
@@ -201,7 +255,7 @@ public with sharing class CF_ChildFilesController {
 
     private static Map<String, Map<String, Object>> getChildRelationshipMaps( List<ChildRelationship> childRelationships ) {
 
-        Set<String> fileLinkableObjectNames = new Set<String>();
+        Set<String> fileLinkableObjectNames = new Set<String>{ 'LookedUpFromActivity' };
 
         for ( SObjectType objType : ContentDocumentLink.LinkedEntityId.getDescribe().getReferenceTo() ) {
 
@@ -225,7 +279,7 @@ public with sharing class CF_ChildFilesController {
                 // unfortunately, apex describe info cannot get the relationship's user-friendly label
                 // we only have the API name or the plural name of the object, but not what the related list is labeled
                 // https://salesforce.stackexchange.com/questions/9140/access-the-related-list-label-for-a-lookup-relationship
-                describeMaps.put( relationship.getRelationshipName(), new Map<String, Object>{
+                describeMaps.put( relationship.getRelationshipName().toUpperCase(), new Map<String, Object>{
                     'relationshipName' => relationship.getRelationshipName(),
                     'fieldName' => fieldDescribe.getName(),
                     'fieldLabel' => fieldDescribe.getLabel(),
