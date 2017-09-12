@@ -93,6 +93,10 @@ Recommendations
 
 ---
 
+<a target='_blank' rel='nofollow' href='https://app.codesponsor.io/link/SXSxcXEh3FwrvhNp1rxuugLP/DouglasCAyers/sfdc-related-files-lightning'>  <img alt='Sponsor' width='888' height='68' src='https://app.codesponsor.io/embed/SXSxcXEh3FwrvhNp1rxuugLP/DouglasCAyers/sfdc-related-files-lightning.svg' /></a>
+
+---
+
 FAQ
 ===
 
@@ -170,6 +174,3 @@ License
 =======
 
 The source code is licensed under the [BSD 3-Clause License](LICENSE)
-
-
-<a target='_blank' rel='nofollow' href='https://app.codesponsor.io/link/SXSxcXEh3FwrvhNp1rxuugLP/DouglasCAyers/sfdc-related-files-lightning'>  <img alt='Sponsor' width='888' height='68' src='https://app.codesponsor.io/embed/SXSxcXEh3FwrvhNp1rxuugLP/DouglasCAyers/sfdc-related-files-lightning.svg' /></a>
