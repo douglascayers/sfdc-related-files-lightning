@@ -58,7 +58,7 @@ Release 1.1 (current release)
 * For Account records, files related to Tasks and Events that rollup to an Account are included (e.g. `Task.AccountId`, `Event.AccountId`) Example: Files related to a Task that is related to an Opportunity will be visible at the Account level. ([issue 3](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/3)) 
 * Child relationships are now case-insensitive in App Builder ([issue 5](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/5))
 
-Release 1.0 (current release)
+Release 1.0
 -----------
 * Initial managed package offering
 * Shows all files, grouped by object, accessible by the user that are shared to related child records of the parent record.
