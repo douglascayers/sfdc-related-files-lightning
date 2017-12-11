@@ -97,11 +97,9 @@ License: BSD 3-Clause License
     handleFileClick : function( component, event, helper ) {
 
         var clickedFileId = event.srcElement.getAttribute( 'data-fileId' );
+        var fileIds = component.get( 'v.selectedFiles' ).map( function( file ) { return file.ContentDocumentId; } );
 
-        $A.get( 'e.lightning:openFiles' ).fire({
-            recordIds : component.get( 'v.selectedFiles' ).map( function( file ) { return file.ContentDocumentId; } ),
-            selectedRecordId : clickedFileId
-        });
+        helper.navigateToFiles( clickedFileId, fileIds );
 
     },
 

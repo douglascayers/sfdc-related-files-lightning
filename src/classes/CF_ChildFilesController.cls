@@ -6,6 +6,60 @@ License: BSD 3-Clause License
 */
 public with sharing class CF_ChildFilesController {
 
+    public ID recordId { get; set; }
+
+    public String sObjectName { get; set; }
+
+    public SObject record { get; set; }
+
+    public String nameField { get; set; }
+
+    public CF_ChildFilesController() {
+
+        this.recordId = ApexPages.currentPage().getParameters().get( 'id' );
+
+        if ( String.isNotBlank( this.recordId ) ) {
+
+            this.sObjectName = this.recordId.getSobjectType().getDescribe().getName();
+
+            this.nameField = getNameField( this.recordId.getSobjectType() );
+
+            this.record = (SObject) Database.query(
+                String.format(
+                    'SELECT {0} FROM {1} WHERE Id = {2}',
+                    new String[] { this.nameField, this.sObjectName, '\'' + this.recordId + '\'' }
+                )
+            );
+
+        }
+
+    }
+
+    /**
+     * https://salesforce.stackexchange.com/questions/149788/how-to-efficiently-determine-the-name-field-of-an-sobject-for-dynamic-query?noredirect=1&lq=1
+     */
+    private String getNameField( SObjectType sObjectType ) {
+
+        String nameField = 'Name';
+
+        Map<String, SObjectField> fields = sObjectType.getDescribe().fields.getMap();
+
+        // edge case, some special standard objects don't use 'Name' as their naming field, like Case.CaseNumber
+        if ( !fields.containsKey( nameField ) || !fields.get( nameField ).getDescribe().isNameField() ) {
+            for ( SObjectField field : fields.values() ) {
+                DescribeFieldResult fieldDesc = field.getDescribe();
+                if ( fieldDesc.isNameField() ) {
+                    nameField = fieldDesc.getName();
+                    break;
+                }
+            }
+        }
+
+        return nameField;
+    }
+
+    // ---------------------------------------------
+
     /**
      * Queries ContentDocumentLinks whose LinkedEntityId is in the sub-query
      * on the given object name where the field name equals the field value.

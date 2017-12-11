@@ -6,9 +6,14 @@
         <name>ApexClass</name>
     </types>
     <types>
+        <members>CF_ChildFilesPage</members>
+        <name>ApexPage</name>
+    </types>
+    <types>
         <members>CF_ChildFilesCmp</members>
+        <members>CF_ChildFilesOutApp</members>
         <members>defaultTokens</members>
         <name>AuraDefinitionBundle</name>
     </types>
-    <version>40.0</version>
+    <version>41.0</version>
 </Package>

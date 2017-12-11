@@ -116,6 +116,37 @@ private class CF_ChildFilesControllerTest {
 
     }
 
+    @IsTest
+    static void test_constructor_for_visualforce_case() {
+
+        Account acct = new Account(
+            name = 'Test Account'
+        );
+
+        insert acct;
+
+        Case cs = new Case(
+            accountId = acct.id,
+            subject = 'Test Case'
+        );
+
+        insert cs;
+
+        Test.startTest();
+
+        Test.setCurrentPage( Page.CF_ChildFilesPage );
+
+        ApexPages.currentPage().getParameters().put( 'id', cs.id );
+
+        CF_ChildFilesController controller = new CF_ChildFilesController();
+
+        Test.stopTest();
+
+        System.assertEquals( cs.id, controller.recordId );
+        System.assertEquals( 'Case', controller.sObjectName );
+
+    }
+
 }
 /*
 BSD 3-Clause License

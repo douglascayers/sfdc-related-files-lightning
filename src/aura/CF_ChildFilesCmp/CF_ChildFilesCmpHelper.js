@@ -204,6 +204,27 @@ License: BSD 3-Clause License
 
     },
 
+    navigateToFiles : function( selectedFileId, fileIds ) {
+
+        var helper = this;
+
+        var event = $A.get( 'e.lightning:openFiles' );
+
+        if ( event ) {
+
+            event.fire({
+                recordIds : fileIds,
+                selectedRecordId : selectedFileId
+            });
+
+        } else {
+
+            helper.navigateToRecord( selectedFileId );
+
+        }
+
+    },
+
     navigateToRecord : function( recordId ) {
 
         console.log( 'navigating to record: ' + recordId );
