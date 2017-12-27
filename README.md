@@ -95,7 +95,7 @@ Recommendations
 FAQ
 ===
 
-If one of your questions isn't answered below, please search and comment on [existing issues](/issues?utf8=%E2%9C%93&q=is%3Aissue) before opening a new one. Thanks! 
+If one of your questions isn't answered below, please search and comment on [existing issues](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues?utf8=%E2%9C%93&q=is%3Aissue) before opening a new one. Thanks! 
 
 Which files are shown in the Lightning Component?
 -------------------------------------------------
