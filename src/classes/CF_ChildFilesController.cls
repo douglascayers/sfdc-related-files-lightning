@@ -61,6 +61,93 @@ public with sharing class CF_ChildFilesController {
     // ---------------------------------------------
 
     /**
+     * Returns the columns to display in the data table.
+     * Designed for lightning:datatable component.
+     * https://developer.salesforce.com/docs/atlas.en-us.lightning.meta/lightning/aura_compref_lightning_datatable.htm
+     */
+    @AuraEnabled
+    public static List<Map<String, String>> getRelatedFilesColumns() {
+
+        List<Map<String, String>> columns = getRelatedFilesColumnsByFieldSet( 'Related_Files_Columns' );
+
+        if ( columns.isEmpty() ) {
+            columns.addAll( getDefaultRelatedFilesColumns() );
+        }
+
+        System.debug( 'relatedFilesColumns: ' + JSON.serializePretty( columns ) );
+
+        return columns;
+    }
+
+    private static List<Map<String, String>> getRelatedFilesColumnsByFieldSet( String fieldSetName ) {
+
+        List<Map<String, String>> columns = new List<Map<String, String>>();
+
+        Map<String, FieldSet> fsMap = SObjectType.ContentVersion.fieldSets.getMap();
+
+        for ( String fsName : fsMap.keySet() ) {
+
+            FieldSet fs = fsMap.get( fsName );
+
+            if ( fs.getName().equalsIgnoreCase( fieldSetName ) ) {
+
+                for ( FieldSetMember fsm : fs.getFields() ) {
+
+                    columns.add( new Map<String, String>{
+                        'label' => fsm.getLabel(),
+                        'fieldName' => fsm.getFieldPath().remove( '.' ),
+                        'fieldPath' => fsm.getFieldPath(),
+                        'type' => String.valueOf( fsm.getType() ).toUpperCase()
+                    });
+
+                }
+
+                break;
+            }
+
+        }
+
+        return columns;
+    }
+
+    private static List<Map<String, String>> getDefaultRelatedFilesColumns() {
+
+        List<Map<String, String>> columns = new List<Map<String, String>>();
+
+        columns.add( new Map<String, String>{
+            'label' => 'Title',
+            'fieldName' => 'Title',
+            'fieldPath' => 'Title',
+            'type' => 'STRING'
+        });
+
+        columns.add( new Map<String, String>{
+            'label' => 'Owner Name',
+            'fieldName' => 'OwnerName',
+            'fieldPath' => 'Owner.Name',
+            'type' => 'STRING'
+        });
+
+        columns.add( new Map<String, String>{
+            'label' => 'Last Modified',
+            'fieldName' => 'LastModifiedDate',
+            'fieldPath' => 'LastModifiedDate',
+            'type' => 'DATETIME'
+        });
+
+        columns.add( new Map<String, String>{
+            'label' => 'Size',
+            'fieldName' => 'HumanReadableContentSize',
+            'fieldPath' => 'ContentSize',
+            'type' => 'INTEGER'
+        });
+
+        return columns;
+    }
+
+    // ---------------------------------------------
+
+    /**
      * Queries ContentDocumentLinks whose LinkedEntityId is in the sub-query
      * on the given object name where the field name equals the field value.
      *
@@ -77,19 +164,12 @@ public with sharing class CF_ChildFilesController {
 
         if ( entityIds.size() > 0 ) {
 
+            List<Map<String, String>> relatedFilesColumns = getRelatedFilesColumns();
+            Set<String> soqlSelectColumns = buildSoqlSelectClause( relatedFilesColumns );
+
             String query =
                 ' SELECT ' +
-                    ' ContentDocument.LatestPublishedVersion.Id, ' +
-                    ' ContentDocument.LatestPublishedVersion.ContentDocumentId, ' +
-                    ' ContentDocument.LatestPublishedVersion.Title, ' +
-                    ' ContentDocument.LatestPublishedVersion.OwnerId, ' +
-                    ' ContentDocument.LatestPublishedVersion.Owner.Name, ' +
-                    ' ContentDocument.LatestPublishedVersion.ContentSize, ' +
-                    ' ContentDocument.LatestPublishedVersion.PathOnClient, ' +
-                    ' ContentDocument.LatestPublishedVersion.FileExtension, ' +
-                    ' ContentDocument.LatestPublishedVersion.FileType, ' +
-                    ' ContentDocument.LatestPublishedVersion.CreatedDate, ' +
-                    ' ContentDocument.LatestPublishedVersion.LastModifiedDate ' +
+                    String.join( new List<String>( soqlSelectColumns ), ', ' ) +
                 ' FROM ' +
                     ' ContentDocumentLink ' +
                 ' WHERE ' +
@@ -117,28 +197,87 @@ public with sharing class CF_ChildFilesController {
             // don't want to create another helper class since we only need this structure
             // when serializing the data back to our Lightning Component, so just using a map.
             for ( ContentVersionWrapper wrapper : wrappers ) {
-                files.add( new Map<String, Object>{
-                    'Id' => wrapper.file.Id,
-                    'ContentDocumentId' => wrapper.file.ContentDocumentId,
-                    'Title' => wrapper.file.Title,
-                    'OwnerId' => wrapper.file.OwnerId,
-                    'OwnerName' => wrapper.file.Owner.Name,
-                    'ContentSize' => wrapper.file.ContentSize,
-                    'HumanReadableContentSize' => getHumanReadableByteCount( wrapper.file.ContentSize ),
-                    'PathOnClient' => wrapper.file.PathOnClient,
-                    'FileExtension' => wrapper.file.FileExtension,
-                    'FileType' => wrapper.file.FileType,
-                    'FileTypeIconName' => 'doctype:attachment',
-                    'CreatedDate' => wrapper.file.CreatedDate,
-                    'CreatedDateTimestamp' => wrapper.file.CreatedDate.getTime(),
-                    'LastModifiedDate' => wrapper.file.LastModifiedDate,
-                    'LastModifiedDateTimestamp' => wrapper.file.LastModifiedDate.getTime()
-                });
+                Map<String, Object> fileMap = buildFileMap( wrapper.file, relatedFilesColumns );
+                files.add( fileMap );
             }
 
         }
 
         return files;
+    }
+
+    private static Set<String> buildSoqlSelectClause( List<Map<String, String>> relatedFilesColumns ) {
+
+        Set<String> soqlSelectColumns = new Set<String>();
+
+        for ( Map<String, String> column : relatedFilesColumns ) {
+            if ( column.get( 'type' ) == 'PICKLIST' ) {
+                soqlSelectColumns.add( 'toLabel(ContentDocument.LatestPublishedVersion.' + column.get( 'fieldPath' ) + ')' );
+            } else {
+                soqlSelectColumns.add( 'ContentDocument.LatestPublishedVersion.' + column.get( 'fieldPath' ) );
+            }
+        }
+
+        // also add some standard fields I always want available
+        for ( String column : new String[] { 'Id', 'ContentDocumentId', 'OwnerId', 'Owner.Name', 'ContentSize', 'PathOnClient', 'FileExtension', 'FileType', 'CreatedDate', 'LastModifiedDate' } ) {
+            soqlSelectColumns.add( 'ContentDocument.LatestPublishedVersion.' + column );
+        }
+
+        return soqlSelectColumns;
+    }
+
+    private static Map<String, Object> buildFileMap( ContentVersion file, List<Map<String, String>> relatedFilesColumns ) {
+
+        Map<String, Object> fileMap = new Map<String, Object>();
+
+        for ( Map<String, String> column : relatedFilesColumns ) {
+
+            String fieldName = column.get( 'fieldName' );
+            String fieldPath = column.get( 'fieldPath' );
+
+            // initialize
+            fileMap.put( fieldName, null );
+
+            // column name might be field name like 'Status'
+            // or might be field path like 'Owner.Alias'
+            String[] fieldPaths = fieldPath.split( '\\.' );
+
+            SObject value = file;
+
+            // walk object path (e.g. record.Owner)
+            for ( Integer i = 0; i < fieldPaths.size() - 1; i++ ) {
+                if ( value == null ) break;
+                value = value.getSObject( fieldPaths[i] );
+            }
+
+            if ( value != null ) {
+                // finally, retrieve property value (e.g. 'Alias' field of 'Owner.Alias' path)
+                fileMap.put( fieldName, value.get( fieldPaths[fieldPaths.size() - 1] ) );
+            }
+
+        }
+
+        // regardless the fields specified by the field set
+        // these fields I always want available
+        fileMap.putAll( new Map<String, Object>{
+            'Id' => file.Id,
+            'ContentDocumentId' => file.ContentDocumentId,
+            'Title' => file.Title,
+            'OwnerId' => file.OwnerId,
+            'OwnerName' => file.Owner.Name,
+            'ContentSize' => file.ContentSize,
+            'HumanReadableContentSize' => getHumanReadableByteCount( file.ContentSize ),
+            'PathOnClient' => file.PathOnClient,
+            'FileExtension' => file.FileExtension,
+            'FileType' => file.FileType,
+            'FileTypeIconName' => 'doctype:attachment',
+            'CreatedDate' => file.CreatedDate,
+            'LastModifiedDate' => file.LastModifiedDate
+        });
+
+        System.debug( 'fileMap: ' + JSON.serializePretty( fileMap ) );
+
+        return fileMap;
     }
 
     private static Set<ID> queryForEntityIds( String relationshipName, String objectName, String fieldName, String fieldValue ) {

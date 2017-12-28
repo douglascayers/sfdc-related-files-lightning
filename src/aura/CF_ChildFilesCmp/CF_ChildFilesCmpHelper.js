@@ -103,6 +103,14 @@ License: BSD 3-Clause License
 
     },
 
+    getRelatedFilesColumnsAsync : function( component ) {
+
+        var helper = this;
+
+        return helper.enqueueAction( component, 'c.getRelatedFilesColumns', {}, { 'storable' : true } );
+
+    },
+
     getChildRelationshipNamesSorted : function( component, objectDescribe ) {
 
         var childRelationships = [];

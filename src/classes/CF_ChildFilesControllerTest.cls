@@ -32,17 +32,17 @@ private class CF_ChildFilesControllerTest {
         System.assertEquals( 0, relatedFiles.size() );
 
         ContentVersion newFile1 = new ContentVersion(
-                title = 'Test File',
-                pathOnClient = 'Test File.txt',
-                versionData = Blob.valueOf( 'Test' ),
-                firstPublishLocationId = tsk.id
+            title = 'Test File',
+            pathOnClient = 'Test File.txt',
+            versionData = Blob.valueOf( 'Test' ),
+            firstPublishLocationId = tsk.id
         );
 
         ContentVersion newFile2 = new ContentVersion(
-                title = 'Test File 2',
-                pathOnClient = 'Test File 2.txt',
-                versionData = Blob.valueOf( 'Test 2' ),
-                firstPublishLocationId = tsk.id
+            title = 'Test File 2',
+            pathOnClient = 'Test File 2.txt',
+            versionData = Blob.valueOf( 'Test 2' ),
+            firstPublishLocationId = tsk.id
         );
 
         insert new ContentVersion[] { newFile1, newFile2 };

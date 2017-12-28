@@ -10,8 +10,14 @@ License: BSD 3-Clause License
         var objectName = component.get( 'v.sObjectName' );
         var recordId = component.get( 'v.recordId' );
 
-        helper.getObjectDescribeAsync( component, objectName )
-            .then( $A.getCallback( function( objectDescribe ) {
+        helper.getRelatedFilesColumnsAsync( component )
+            .then( $A.getCallback( function( columns ) {
+
+                component.set( 'v.columns', columns );
+
+                return helper.getObjectDescribeAsync( component, objectName );
+
+            })).then( $A.getCallback( function( objectDescribe ) {
 
                 component.set( 'v.sObjectDescribe', objectDescribe );
 

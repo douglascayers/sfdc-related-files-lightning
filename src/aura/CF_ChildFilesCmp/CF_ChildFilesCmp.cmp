@@ -7,7 +7,7 @@ License: BSD 3-Clause License
 <aura:component controller="CF_ChildFilesController" implements="flexipage:availableForRecordHome,force:hasRecordId,force:hasSObjectName" access="global">
 
     <aura:attribute name="sObjectDescribe"
-                    type="Object"
+                    type="Map"
                     description="SObject and Field describe info"/>
 
     <aura:attribute name="sObjectName"
@@ -30,7 +30,7 @@ License: BSD 3-Clause License
                     description="Comma-separated list of child relationship API names provided by design attributes in App Builder."/>
 
     <aura:attribute name="childRelationshipFiles"
-                    type="Object[]"
+                    type="Map[]"
                     description="Array of wrapper objects that denote the child relationship name, describe info, and list of shared files. The main content that is displayed in this component."/>
 
     <aura:attribute name="selectedIndex"
@@ -39,12 +39,16 @@ License: BSD 3-Clause License
                     description="Index in 'childRelationshipFiles' array of the selected relationship. Indicates which relationship is highlighted as active in the vertical nav list."/>
 
     <aura:attribute name="selectedFiles"
-                    type="Object[]"
+                    type="Map[]"
                     description="Array of files shared to records of the selected relationship. These are the files displayed in the component."/>
 
     <aura:attribute name="selectedRelationship"
                     type="Object"
                     description="Element in 'childRelationshipFiles' at the selected index."/>
+
+    <aura:attribute name="columns"
+                    type="Map[]"
+                    description="The table columns to display. Intended for lightning:datatable component."/>
 
     <!-- Events -->
 
@@ -98,18 +102,11 @@ License: BSD 3-Clause License
                             <th scope="col" class="slds-cell-wrap">
                                 &nbsp;
                             </th>
-                            <th scope="col" class="slds-cell-wrap">
-                                <div title="Title">Title</div>
-                            </th>
-                            <th scope="col" class="slds-cell-wrap">
-                                <div title="Owner">Owner</div>
-                            </th>
-                            <th scope="col" class="slds-cell-wrap">
-                                <div title="Last Modified">Last Modified</div>
-                            </th>
-                            <th scope="col" class="slds-cell-wrap">
-                                <div title="Size">Size</div>
-                            </th>
+                            <aura:iteration var="column" items="{!v.columns}">
+                                <th scope="col" class="slds-cell-wrap">
+                                    <div title="{!column.label}">{!column.label}</div>
+                                </th>
+                            </aura:iteration>
                         </tr>
                     </thead>
                     <tbody>
@@ -149,8 +146,8 @@ License: BSD 3-Clause License
                                     </div>
                                 </td>
                                 <td data-label="Last Modified" class="slds-cell-wrap">
-                                    <div title="{!file.LastModifiedDateTimestamp}">
-                                        <lightning:formattedDateTime value="{!file.LastModifiedDateTimestamp}" year="numeric" month="numeric" day="numeric" hour="numeric" minute="numeric"/>
+                                    <div title="{!file.LastModifiedDate}">
+                                        <lightning:formattedDateTime value="{!file.LastModifiedDate}" year="numeric" month="numeric" day="numeric" hour="numeric" minute="numeric"/>
                                     </div>
                                 </td>
                                 <td data-label="Size" class="slds-cell-wrap">
@@ -161,6 +158,15 @@ License: BSD 3-Clause License
 
                     </tbody>
                 </table>
+
+                <!-- https://releasenotes.docs.salesforce.com/en-us/spring18/release-notes/rn_lc_components.htm -->
+                <!--
+                <lightning:datatable aura:id="datatable"
+                     keyField="Id"
+                     columns="{!v.columns}"
+                     data="{!v.selectedFiles}"
+                     hideCheckboxColumn="true"/>
+                -->
 
             </div>
 
