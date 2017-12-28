@@ -15,5 +15,16 @@
         <members>defaultTokens</members>
         <name>AuraDefinitionBundle</name>
     </types>
+    <types>
+        <members>Account.View_Related_Files</members>
+        <members>Campaign.View_Related_Files</members>
+        <members>Case.View_Related_Files</members>
+        <members>Contact.View_Related_Files</members>
+        <members>Contract.View_Related_Files</members>
+        <members>Lead.View_Related_Files</members>
+        <members>Opportunity.View_Related_Files</members>
+        <members>Order.View_Related_Files</members>
+        <name>WebLink</name>
+    </types>
     <version>41.0</version>
 </Package>
