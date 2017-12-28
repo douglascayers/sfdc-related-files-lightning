@@ -6,7 +6,7 @@ License: BSD 3-Clause License
 -->
 <apex:page controller="CF_ChildFilesController" lightningStylesheets="true">
 
-    <apex:slds/>
+    <apex:slds />
     <apex:includeLightning />
 
     <div class="slds-scope">
