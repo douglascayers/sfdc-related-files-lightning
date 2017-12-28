@@ -49,11 +49,17 @@ Seeing a need I began developing this app. After [sharing a sneak peek](https://
 Packaged Release History
 ------------------------
 
-Release 1.1 (current release)
+Release 1.2 (current release)
 -----------
 * Install package
-  * [Production URL](https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1I000000h81M)
-  * [Sandbox URL](https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1I000000h81M)
+  * [Production URL](https://login.salesforce.com/packaging/installPackage.apexp?p0=)
+  * [Sandbox URL](https://test.salesforce.com/packaging/installPackage.apexp?p0=)
+* Add support for Classic Experience ([issue 10](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/10))
+  * Add provided buttons `View Related Files` to your page layouts, or
+  * Create custom buttons that link to `/apex/CF_ChildFilesPage?id={!YourObject.Id}`
+
+Release 1.1
+-----------
 * Add support for custom lookup fields on Activities ([issue 2](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/2))
 * For Account records, files related to Tasks and Events that rollup to an Account are included (e.g. `Task.AccountId`, `Event.AccountId`) Example: Files related to a Task that is related to an Opportunity will be visible at the Account level. ([issue 3](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/3)) 
 * Child relationships are now case-insensitive in App Builder ([issue 5](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/5))
