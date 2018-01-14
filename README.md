@@ -121,7 +121,7 @@ you might enter "`Contacts,Invoices__r`".
 
 To determine a child relationship name, in Setup use Object Manager to navigate to your child object (e.g. `Contact` or `Invoice__c`)
 then navigate to the lookup field that points to the parent object (that is the object whose Lightning Record Page you're adding this component).
-On the field's detail page you'll see the field label, field name, and the child relationship name (use this value in App Bulider).
+On the field's detail page you'll see the field label, field name, and the child relationship name (use this value in App Bulider). If this is a custom lookup or master-detail field then [you will need to append `__r` to the child relationship name](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/13).
 
 ![screen shot](images/setup-child-relationship-field-name.png)
 
