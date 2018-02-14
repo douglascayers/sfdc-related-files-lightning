@@ -55,7 +55,7 @@ Release 1.2 (current release)
   * [Production URL](https://login.salesforce.com/packaging/installPackage.apexp?p0=)
   * [Sandbox URL](https://test.salesforce.com/packaging/installPackage.apexp?p0=)
 * Add support for Classic Experience ([issue 10](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/10))
-  * Add provided buttons `View Related Files` to your page layouts, or
+  * Add provided buttons labeled `View Related Files` to your page layouts, or
   * Create custom buttons that link to `/apex/CF_ChildFilesPage?id={!YourObject.Id}`
 
 Release 1.1
@@ -141,6 +141,23 @@ when viewing this **Related Files** lightning component on that account page wou
 for the `Contacts` relationship even though 3 contacts exist because only 1 unique file was shared among them.
 
 ![screen shot](images/related-files-badge-counts.png)
+
+How do I use this app in Classic?
+---------------------------------
+
+Add the provided buttons labeled `View Related Files` to your page layouts, or
+create your own custom buttons that link to `/apex/CF_ChildFilesPage?id={!YourObject.Id}`.
+
+The Visualforce page supports these URL parameters to customize the component:
+
+| Parameters | Examples | Required? | Default |
+|-----------|-----------|-----------|---------|
+| id        | 15 or 18 character sobject record id | yes | |
+| r         | To customize which related lists are shown in the vertical navigation then specify a comma-separated list of the API name(s) of the child relationships whose files to show. | no | blank, shows all child relationships |
+| f         | To filter if Files and/or Enhanced Notes are displayed in the lists then specify `FILES_ONLY`, `NOTES_ONLY`, or `FILES_AND_NOTES` | no | `FILES_AND_NOTES` |
+
+Example:
+  * `/apex/CF_ChildFilesPage?id=0011I00000345FD&r=Contacts,Invoices__r&f=FILES_ONLY`
 
 I don't see Attachments from related records like in Classic, what gives?
 -------------------------------------------------------------------------

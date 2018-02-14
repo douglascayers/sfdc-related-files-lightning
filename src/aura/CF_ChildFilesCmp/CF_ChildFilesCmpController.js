@@ -22,6 +22,7 @@ License: BSD 3-Clause License
                 component.set( 'v.sObjectDescribe', objectDescribe );
 
                 var selectedIndex = component.get( 'v.selectedIndex' );
+                var filesAndNotesFilter = component.get( 'v.filesAndNotesFilter' );
                 var childRelationshipNames = component.get( 'v.childRelationshipNames' );
                 var childRelationshipFiles = [];
 
@@ -120,7 +121,7 @@ License: BSD 3-Clause License
 /*
 BSD 3-Clause License
 
-Copyright (c) 2017, Doug Ayers
+Copyright (c) 2018, Doug Ayers
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

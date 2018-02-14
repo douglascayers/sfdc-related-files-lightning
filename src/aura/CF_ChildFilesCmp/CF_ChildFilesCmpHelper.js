@@ -343,7 +343,7 @@ License: BSD 3-Clause License
 /*
 BSD 3-Clause License
 
-Copyright (c) 2017, Doug Ayers
+Copyright (c) 2018, Doug Ayers
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

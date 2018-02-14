@@ -26,7 +26,9 @@ License: BSD 3-Clause License
                 "dca_junto_files:CF_ChildFilesCmp",
                 {
                     "recordId" : "{!recordId}",
-                    "sObjectName" : "{!sObjectName}"
+                    "sObjectName" : "{!sObjectName}",
+                    "childRelationshipNames" : "{!$CurrentPage.parameters.r}",
+                    "filesAndNotesFilter" : "{!$CurrentPage.parameters.f}"
                 },
                 "container",
                 function( newCmp ) {
@@ -41,7 +43,7 @@ License: BSD 3-Clause License
 <!--
 BSD 3-Clause License
 
-Copyright (c) 2017, Doug Ayers
+Copyright (c) 2018, Doug Ayers
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
