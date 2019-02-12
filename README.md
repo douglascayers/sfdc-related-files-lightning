@@ -58,17 +58,38 @@ Release 1.1 (current release)
 * For Account records, files related to Tasks and Events that rollup to an Account are included (e.g. `Task.AccountId`, `Event.AccountId`) Example: Files related to a Task that is related to an Opportunity will be visible at the Account level. ([issue 3](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/3)) 
 * Child relationships are now case-insensitive in App Builder ([issue 5](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/5))
 
-Release 1.0 (current release)
------------
-* Initial managed package offering
-* Shows all files, grouped by object, accessible by the user that are shared to related child records of the parent record.
-
 Installing the Source Code (Developers)
 ---------------------------------------
 
 You may install the unmanaged code from GitHub and make any desired adjustments. You are responsible for ensuring unit tests meet your org's validation rules and other requirements.
 
-* [Deploy from Github](https://githubsfdeploy.herokuapp.com)
+1. Install the [Salesforce CLI](https://developer.salesforce.com/tools/sfdxcli).
+
+2. Clone this repository.
+
+```
+git clone https://github.com/douglascayers/sfdc-related-files-lightning.git
+```
+
+3. Change directory into the project folder.
+
+```
+cd sfdc-related-files-lightning
+```
+
+4. Authorize your org with Salesforce CLI using the following command, replacing **YourOrgAlias** with an alias of your choice.
+
+```
+sfdx force:auth:web:login --setalias YourOrgAlias --setdefaultusername
+```
+
+> If connecting to a sandbox, add the `--instanceurl https://test.salesforce.com` argument to the above command.
+
+5. Deploy metadata to your org with Salesforce CLI using the following command, replacing **YourOrgAlias** with the alias you provided in step 3 above. When deploying to production, you may need to either (a) update the code or (b) relax validation rules if any of the apex tests in this package fail during installation. If you install the [managed package](https://github.com/douglascayers/sfdc-related-files-lightning#packaged-release-history), you skip this headache.
+
+```
+sfdx force:mdapi:deploy --deploydir src --targetusername YourOrgAlias --wait 10
+```
 
 ---
 
