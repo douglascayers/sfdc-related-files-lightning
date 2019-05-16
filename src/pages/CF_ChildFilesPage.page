@@ -21,16 +21,18 @@ License: BSD 3-Clause License
 
     <script>
 
-        $Lightning.use( 'dca_junto_files:CF_ChildFilesOutApp', function() {
+        let namespace = '{!orgNamespace}' || 'c';
+
+        $Lightning.use( namespace + ':CF_ChildFilesOutApp', function() {
             $Lightning.createComponent(
-                "dca_junto_files:CF_ChildFilesCmp",
+                namespace + ':CF_ChildFilesCmp',
                 {
-                    "recordId" : "{!recordId}",
-                    "sObjectName" : "{!sObjectName}",
-                    "childRelationshipNames" : "{!$CurrentPage.parameters.r}",
-                    "filesAndNotesFilter" : "{!$CurrentPage.parameters.f}"
+                    'recordId' : '{!recordId}',
+                    'sObjectName' : '{!sObjectName}',
+                    'childRelationshipNames' : '{!$CurrentPage.parameters.r}',
+                    'filesAndNotesFilter' : '{!$CurrentPage.parameters.f}'
                 },
-                "container",
+                'container',
                 function( newCmp ) {
 
                 }
@@ -43,7 +45,7 @@ License: BSD 3-Clause License
 <!--
 BSD 3-Clause License
 
-Copyright (c) 2018, Doug Ayers
+Copyright (c) 2019, Doug Ayers
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

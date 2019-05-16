@@ -1,27 +1,19 @@
-<!--
+/*
 Author: Doug Ayers
 Website: https://douglascayers.com
 GitHub: https://github.com/DouglasCAyers/sfdc-related-files-lightning
 License: BSD 3-Clause License
--->
-<design:component label="Related Files">
+*/
+public with sharing class CF_NamespaceUtils {
 
-    <design:attribute name="childRelationshipNames"
-                      label="Child Relationships"
-                      description="Comma-separated list of child relationship API names whose related files to show. For example, 'Contacts' to show files belonging to records in contact related list, or 'Invoices__r' to show files belonging to records in custom invoice related list."/>
+    private static final String MY_NAMESPACE = [ SELECT NamespacePrefix FROM ApexClass WHERE Name = 'CF_NamespaceUtils' LIMIT 1 ].NamespacePrefix;
 
-    <design:attribute name="componentCardTitle"
-                      label="Title"
-                      default="Related Files"
-                      description="Title of the component on the page."/>
+    public static final String NAMESPACE = String.isBlank( MY_NAMESPACE ) ? '' : MY_NAMESPACE;
 
-    <design:attribute name="filesAndNotesFilter"
-                      label="Files and/or Notes"
-                      datasource="apex://CF_ChildFilesFilterDynamicPicklist"
-                      description="Determines if component displays related files and/or notes."/>
+    public static final String NAMESPACE_API = String.isBlank( MY_NAMESPACE ) ? '' : MY_NAMESPACE + '__';
 
-</design:component>
-<!--
+}
+/*
 BSD 3-Clause License
 
 Copyright (c) 2019, Doug Ayers
@@ -31,15 +23,15 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
 * Redistributions of source code must retain the above copyright notice, this
-list of conditions and the following disclaimer.
+  list of conditions and the following disclaimer.
 
 * Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
 
 * Neither the name of the copyright holder nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -51,4 +43,4 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--->
+*/

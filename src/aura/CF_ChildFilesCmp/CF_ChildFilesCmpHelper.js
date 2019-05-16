@@ -90,8 +90,7 @@ License: BSD 3-Clause License
 
         }, {
 
-            'background' : background,
-            'storable' : true
+            'background' : background
 
         }).then( $A.getCallback( function( files ) {
 
@@ -107,7 +106,7 @@ License: BSD 3-Clause License
 
         var helper = this;
 
-        return helper.enqueueAction( component, 'c.getRelatedFilesColumns', {}, { 'storable' : true } );
+        return helper.enqueueAction( component, 'c.getRelatedFilesColumns' );
 
     },
 
@@ -343,7 +342,7 @@ License: BSD 3-Clause License
 /*
 BSD 3-Clause License
 
-Copyright (c) 2018, Doug Ayers
+Copyright (c) 2019, Doug Ayers
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

@@ -147,11 +147,26 @@ private class CF_ChildFilesControllerTest {
 
     }
 
+    @IsTest
+    static void test_get_org_namespace() {
+
+        Test.startTest();
+
+        CF_ChildFilesController controller = new CF_ChildFilesController();
+
+        String orgNamespace = controller.getOrgNamespace();
+
+        Test.stopTest();
+
+        System.assertEquals( CF_NamespaceUtils.NAMESPACE, orgNamespace );
+
+    }
+
 }
 /*
 BSD 3-Clause License
 
-Copyright (c) 2018, Doug Ayers
+Copyright (c) 2019, Doug Ayers
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

@@ -35,6 +35,10 @@ public with sharing class CF_ChildFilesController {
 
     }
 
+    public String getOrgNamespace() {
+        return CF_NamespaceUtils.NAMESPACE;
+    }
+
     /**
      * https://salesforce.stackexchange.com/questions/149788/how-to-efficiently-determine-the-name-field-of-an-sobject-for-dynamic-query?noredirect=1&lq=1
      */
@@ -65,7 +69,7 @@ public with sharing class CF_ChildFilesController {
      * Designed for lightning:datatable component.
      * https://developer.salesforce.com/docs/atlas.en-us.lightning.meta/lightning/aura_compref_lightning_datatable.htm
      */
-    @AuraEnabled
+    @AuraEnabled( cacheable = true )
     public static List<Map<String, String>> getRelatedFilesColumns() {
 
         List<Map<String, String>> columns = getRelatedFilesColumnsByFieldSet( 'Related_Files_Columns' );
@@ -155,7 +159,7 @@ public with sharing class CF_ChildFilesController {
      *      Calling getFiles( 'Contacts', 'Contact', 'AccountId', '001f4000005YzSiAAK' )
      *      returns files shared to contacts belonging to this account.
      */
-    @AuraEnabled
+    @AuraEnabled( cacheable = true )
     public static List<Map<String, Object>> getRelatedFiles( String relationshipName, String objectName, String fieldName, String fieldValue ) {
 
         List<Map<String, Object>> files = new List<Map<String, Object>>();
@@ -428,7 +432,7 @@ public with sharing class CF_ChildFilesController {
 
     // -------------------------------------------------------------
 
-    @AuraEnabled
+    @AuraEnabled( cacheable = true )
     public static Map<String, Object> getObjectDescribe( String myObjectName ) {
 
         DescribeSObjectResult objectDescribe = Schema.getGlobalDescribe().get( myObjectName ).getDescribe();
@@ -530,7 +534,7 @@ public with sharing class CF_ChildFilesController {
 /*
 BSD 3-Clause License
 
-Copyright (c) 2018, Doug Ayers
+Copyright (c) 2019, Doug Ayers
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
