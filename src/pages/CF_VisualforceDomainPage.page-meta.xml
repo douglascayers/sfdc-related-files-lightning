@@ -3,7 +3,7 @@
     <apiVersion>45.0</apiVersion>
     <availableInTouch>false</availableInTouch>
     <confirmationTokenRequired>false</confirmationTokenRequired>
-    <label>CF_ChildFilesPage</label>
+    <label>LC_VisualforceDomainPage</label>
     <packageVersions>
         <majorNumber>1</majorNumber>
         <minorNumber>7</minorNumber>

@@ -26,6 +26,8 @@ private class CF_ChildFilesControllerTest {
 
         List<Map<String, Object>> relatedFiles = null;
 
+        Test.setMock( HttpCalloutMock.class, new CF_HttpCalloutMock() );
+
         Test.startTest();
 
         relatedFiles = CF_ChildFilesController.getRelatedFiles( 'Tasks', 'LookedUpFromActivity', 'AccountId', acct.id, 'FILES_AND_NOTES' );
@@ -73,6 +75,8 @@ private class CF_ChildFilesControllerTest {
 
         List<Map<String, Object>> relatedFiles = null;
 
+        Test.setMock( HttpCalloutMock.class, new CF_HttpCalloutMock() );
+
         Test.startTest();
 
         relatedFiles = CF_ChildFilesController.getRelatedFiles( 'Contacts', 'Contact', 'AccountId', acct.id, 'FILES_AND_NOTES' );
@@ -112,6 +116,8 @@ private class CF_ChildFilesControllerTest {
     @IsTest
     static void test_get_object_describe() {
 
+        Test.setMock( HttpCalloutMock.class, new CF_HttpCalloutMock() );
+
         Test.startTest();
 
         Map<String, Object> objectDescribeMap = CF_ChildFilesController.getObjectDescribe( 'Account' );
@@ -121,6 +127,25 @@ private class CF_ChildFilesControllerTest {
         DescribeSObjectResult objectDescribe = Account.sobjectType.getDescribe();
 
         System.assertEquals( objectDescribeMap.get( 'name' ), objectDescribe.getName() );
+
+    }
+
+    @IsTest
+    static void test_get_default_related_files_columns() {
+
+        Test.setMock( HttpCalloutMock.class, new CF_HttpCalloutMock() );
+
+        Test.startTest();
+
+        List<Map<String, String>> defaultColumns = CF_ChildFilesController.getDefaultRelatedFilesColumns();
+
+        Test.stopTest();
+
+        System.assertEquals( 4, defaultColumns.size() );
+        System.assertEquals( 'Title', defaultColumns[0].get( 'label' ) );
+        System.assertEquals( 'Owner Name', defaultColumns[1].get( 'label' ) );
+        System.assertEquals( 'Last Modified', defaultColumns[2].get( 'label' ) );
+        System.assertEquals( 'Size', defaultColumns[3].get( 'label' ) );
 
     }
 
@@ -140,6 +165,8 @@ private class CF_ChildFilesControllerTest {
 
         insert cs;
 
+        Test.setMock( HttpCalloutMock.class, new CF_HttpCalloutMock() );
+
         Test.startTest();
 
         Test.setCurrentPage( Page.CF_ChildFilesPage );
@@ -157,6 +184,8 @@ private class CF_ChildFilesControllerTest {
 
     @IsTest
     static void test_get_org_namespace() {
+
+        Test.setMock( HttpCalloutMock.class, new CF_HttpCalloutMock() );
 
         Test.startTest();
 

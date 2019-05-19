@@ -90,7 +90,7 @@ License: BSD 3-Clause License
                                        data-index="{!index}"
                                        onclick="{!c.handleChildRelationshipClick}">
 
-                                        {!relationship.describe.objectLabelPlural}
+                                        {!relationship.describe.relationshipLabel}
 
                                         <span class="{! 'slds-badge slds-col_bump-left ' + if( greaterthan( relationship.files.length, 0 ), 'slds-theme_success', '' )}">
                                             <span class="slds-assistive-text">:</span>

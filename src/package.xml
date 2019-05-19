@@ -3,10 +3,17 @@
     <types>
         <members>CF_ChildFilesController</members>
         <members>CF_ChildFilesControllerTest</members>
+        <members>CF_ChildFilesFilterDynamicPicklist</members>
+        <members>CF_ChildFilesFilterDynamicPicklistTest</members>
+        <members>CF_NamespaceUtils</members>
+        <members>CF_NamespaceUtilsTest</members>
+        <members>CF_VisualforceDomainController</members>
+        <members>CF_VisualforceDomainControllerTest</members>
         <name>ApexClass</name>
     </types>
     <types>
         <members>CF_ChildFilesPage</members>
+        <members>CF_VisualforceDomainPage</members>
         <name>ApexPage</name>
     </types>
     <types>

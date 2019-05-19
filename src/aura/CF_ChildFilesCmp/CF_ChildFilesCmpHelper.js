@@ -121,9 +121,9 @@ License: BSD 3-Clause License
         }
 
         childRelationships.sort( function( a, b ) {
-            if ( a.objectLabelPlural.toUpperCase() < b.objectLabelPlural.toUpperCase() ) {
+            if ( a.relationshipLabel.toUpperCase() < b.relationshipLabel.toUpperCase() ) {
                 return -1;
-            } else if ( a.objectLabelPlural.toUpperCase() > b.objectLabelPlural.toUpperCase() ) {
+            } else if ( a.relationshipLabel.toUpperCase() > b.relationshipLabel.toUpperCase() ) {
                 return 1;
             } else {
                 return 0;

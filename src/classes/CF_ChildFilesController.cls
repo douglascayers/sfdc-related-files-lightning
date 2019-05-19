@@ -114,6 +114,7 @@ public with sharing class CF_ChildFilesController {
         return columns;
     }
 
+    @TestVisible
     private static List<Map<String, String>> getDefaultRelatedFilesColumns() {
 
         List<Map<String, String>> columns = new List<Map<String, String>>();
@@ -448,7 +449,7 @@ public with sharing class CF_ChildFilesController {
     @AuraEnabled( cacheable = true )
     public static Map<String, Object> getObjectDescribe( String myObjectName ) {
 
-        DescribeSObjectResult objectDescribe = Schema.getGlobalDescribe().get( myObjectName ).getDescribe();
+        DescribeSObjectResult objectDescribe = ( (SObject) Type.forName( myObjectName ).newInstance() ).getSObjectType().getDescribe();
 
         Map<String, Object> describeMap = new Map<String, Object>{
             'name' => objectDescribe.getName(),
@@ -486,17 +487,61 @@ public with sharing class CF_ChildFilesController {
 
             if ( String.isNotBlank( relationship.getRelationshipName() ) && fileLinkableObjectNames.contains( objectDescribe.getName() ) ) {
 
-                // unfortunately, apex describe info cannot get the relationship's user-friendly label
-                // we only have the API name or the plural name of the object, but not what the related list is labeled
+                // The user-friendly label for related lists are stored in different places for standard and custom fields.
+                //
+                // For standard fields, we can generally get away with using `String.splitByCharacterTypeCamelCase()` on the
+                // DescribeSObjectResult.getChildRelationships()[i].getRelationshipName().
+                // For example, the standard field Asset.AssetProvidedBy has a child relationship name of "ProvidedAssets",
+                // which when split by camel case becomes "Provided Assets".
+                //
+                // For custom fields, that relationship name from Apex describe is akin to the API field name, and not
+                // what we want to display to the user. Instead, we can get the relationship label via a Tooling API query.
+                // The CustomField.Metadata field includes the relationship label.
+                //
                 // https://salesforce.stackexchange.com/questions/9140/access-the-related-list-label-for-a-lookup-relationship
+                // https://github.com/douglascayers/sfdc-related-files-lightning/issues/1
+
+                String standardFieldRelationshipLabel = String.join( relationship.getRelationshipName().splitByCharacterTypeCamelCase(), ' ' );
+                String customFieldRelationshipLabel = null;
+
+                // Per above comments, we make Tooling API query to get the relationship label for a custom field.
+                if ( fieldDescribe.isCustom() ) {
+
+                    try {
+
+                        // Task/Activity is a strange object. The lookup relationships are found in `LookedUpFromActivity`
+                        // although the custom fields are defined on the `Activity` entity, so adjust the object name filter accordingly.
+                        String objectNameFilter = ( objectDescribe.getLocalName() == 'LookedUpFromActivity' ? 'Activity' : objectDescribe.getLocalName() );
+
+                        // On CustomField object, the field names don't include the namespace or __c suffix
+                        String fieldNameFilter = fieldDescribe.getLocalName().substringBeforeLast( '__' );
+
+                        CustomFieldMetadata metadata = queryCustomFieldMetadata( objectNameFilter, fieldNameFilter );
+
+                        System.debug( metadata );
+
+                        customFieldRelationshipLabel = ( ( metadata == null ) ? objectDescribe.getLabelPlural() : metadata.relationshipLabel );
+
+                    } catch ( Exception e ) {
+
+                        System.debug( LoggingLevel.ERROR, e.getMessage() + ' : ' + e.getStackTraceString() );
+                        customFieldRelationshipLabel = objectDescribe.getLabelPlural();
+
+                    }
+
+                }
+
                 describeMaps.put( relationship.getRelationshipName().toUpperCase(), new Map<String, Object>{
                     'relationshipName' => relationship.getRelationshipName(),
+                    'relationshipLabel' => ( fieldDescribe.isCustom() ? customFieldRelationshipLabel : standardFieldRelationshipLabel ),
                     'fieldName' => fieldDescribe.getName(),
                     'fieldLabel' => fieldDescribe.getLabel(),
                     'objectName' => objectDescribe.getName(),
                     'objectLabel' => objectDescribe.getLabel(),
                     'objectLabelPlural' => objectDescribe.getLabelPlural()
                 });
+
+                System.debug( JSON.serializePretty( describeMaps.get( relationship.getRelationshipName().toUpperCase() ) ) );
 
             }
 
@@ -541,6 +586,77 @@ public with sharing class CF_ChildFilesController {
         }
 
         return options;
+    }
+
+    // -------------------------------------------------------------
+
+    /*
+     * Apex classes to assist with JSON deserialization of CustomField tooling api query result.
+     */
+
+    private static CustomFieldMetadata queryCustomFieldMetadata( String objectName, String fieldName ) {
+
+        System.debug( 'CF_ChildFilesController.queryCustomFieldMetadata: objectName=' + objectName + ', fieldName=' + fieldName );
+
+        String query = String.format(
+            'SELECT DeveloperName, Metadata FROM CustomField WHERE TableEnumOrId = {0} AND DeveloperName = {1} LIMIT 1',
+            new String[] { quote( objectName ), quote( fieldName ) }
+        );
+
+        System.debug( 'query= ' + query );
+
+        // When invoked in context of a Lightning Component, the session id is not
+        // enabled for API use (annoying...) so we need to obtain one. Thankfully,
+        // Visualforce domain sessions are enabled for API use.
+        PageReference vfPage = Page.CF_VisualforceDomainPage;
+        Map<String, Object> vfPageJson = (Map<String, Object>) JSON.deserializeUntyped( ( Test.isRunningTest() ? '{ "sessionId" : "' + UserInfo.getSessionId() + '" }' : vfPage.getContent().toString().trim() ) );
+
+        System.debug( JSON.serializePretty( vfPageJson ) );
+
+        HttpRequest req = new HttpRequest();
+        req.setEndpoint( String.format(
+            '{0}/services/data/v45.0/tooling/query/?q={1}',
+            new String[] { URL.getOrgDomainUrl().toExternalForm(), EncodingUtil.urlEncode( query, 'UTF-8' ) }
+        ));
+        req.setMethod( 'GET' );
+        req.setCompressed( true );
+        req.setTimeout( 120000 ); // two minutes
+        req.setHeader( 'Accepts', 'application/json;charset=UTF-8' );
+        req.setHeader( 'Authorization', 'Bearer ' + vfPageJson.get( 'sessionId' ) );
+
+        System.debug( req );
+        System.debug( req.getBody() );
+
+        HttpResponse res = new Http().send( req );
+
+        System.debug( res );
+        System.debug( res.getBody() );
+
+        CustomFieldResult result = (CustomFieldResult) JSON.deserialize( res.getBody(), CustomFieldResult.class );
+
+        CustomFieldMetadata metadata = null;
+
+        if ( result.records != null ) {
+            for ( CustomFieldRecord record : result.records ) {
+                metadata = record.Metadata;
+            }
+        }
+
+        return metadata;
+    }
+
+    private class CustomFieldResult {
+        public List<CustomFieldRecord> records { get; set; }
+    }
+
+    private class CustomFieldRecord {
+        public String DeveloperName { get; set; }
+        public CustomFieldMetadata Metadata { get; set; }
+    }
+
+    private class CustomFieldMetadata {
+        public String relationshipLabel { get; set; }
+        public String relationshipName { get; set; }
     }
 
 }
