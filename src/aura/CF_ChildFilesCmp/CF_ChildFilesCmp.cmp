@@ -26,6 +26,7 @@ License: BSD 3-Clause License
 
     <aura:attribute name="filesAndNotesFilter"
                     type="String"
+                    default="FILES_AND_NOTES"
                     access="global"
                     description="Determines if component displays FILES_ONLY, NOTES_ONLY, or FILES_AND_NOTES."/>
 

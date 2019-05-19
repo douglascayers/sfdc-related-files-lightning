@@ -160,7 +160,7 @@ public with sharing class CF_ChildFilesController {
      *      returns files shared to contacts belonging to this account.
      */
     @AuraEnabled( cacheable = true )
-    public static List<Map<String, Object>> getRelatedFiles( String relationshipName, String objectName, String fieldName, String fieldValue ) {
+    public static List<Map<String, Object>> getRelatedFiles( String relationshipName, String objectName, String fieldName, String fieldValue, String filesAndNotesFilter ) {
 
         List<Map<String, Object>> files = new List<Map<String, Object>>();
 
@@ -178,6 +178,17 @@ public with sharing class CF_ChildFilesController {
                     ' ContentDocumentLink ' +
                 ' WHERE ' +
                     ' LinkedEntityId IN :entityIds ';
+
+            if ( String.isNotBlank( filesAndNotesFilter ) ) {
+                switch on ( filesAndNotesFilter ) {
+                    when 'FILES_ONLY' {
+                        query += ' AND ContentDocument.LatestPublishedVersion.FileType != \'SNOTE\' ';
+                    }
+                    when 'NOTES_ONLY' {
+                        query += ' AND ContentDocument.LatestPublishedVersion.FileType = \'SNOTE\' ';
+                    }
+                }
+            }
 
             System.debug( 'query=' + query );
 
