@@ -64,11 +64,19 @@ License: BSD 3-Clause License
     <lightning:spinner aura:id="init-spinner" variant="brand" class="slds-hide"/>
     <lightning:spinner aura:id="spinner" variant="brand" class="slds-hide"/>
 
-    <lightning:card iconName="{!( empty(v.componentCardTitle) ? '' : 'standard:file' )}" title="{!v.componentCardTitle}">
+    <lightning:card iconName="{!( empty(v.componentCardTitle) ? '' : 'standard:file' )}" class="slds-card_boundary">
 
-        <div class="slds-grid">
+        <aura:set attribute="title">
+            <span class="slds-card__header-title">
+                <span class="slds-card__header-link">
+                    {!v.componentCardTitle}
+                </span>
+            </span>
+        </aura:set>
 
-            <div class="slds-col slds-size_1-of-4 slds-m-horizontal_small slds-p-right_small slds-border_right">
+        <lightning:layout>
+
+            <lightning:layoutItem size="3" class="slds-m-horizontal_small slds-p-right_small slds-border_right">
 
                 <nav class="slds-nav-vertical slds-box cf-relationship-nav" aria-label="{!v.componentCardTitle}">
                     <div class="slds-nav-vertical__section">
@@ -78,7 +86,6 @@ License: BSD 3-Clause License
                                     <a href="javascript:void(0);"
                                        class="slds-nav-vertical__action"
                                        title="{!relationship.describe.objectLabelPlural + ' (' + relationship.name + ')'}"
-                                       aria-describedby="entity-header"
                                        data-index="{!index}"
                                        onclick="{!c.handleChildRelationshipClick}">
 
@@ -97,85 +104,20 @@ License: BSD 3-Clause License
                     </div>
                 </nav>
 
-            </div>
+            </lightning:layoutItem>
 
-            <div class="slds-col slds-size_3-of-4 slds-p-right_small">
+            <lightning:layoutItem class="slds-p-right_small">
 
-                <table class="slds-table slds-table_bordered">
-                    <thead>
-                        <tr class="slds-text-title_caps">
-                            <th scope="col" class="slds-cell-wrap">
-                                &nbsp;
-                            </th>
-                            <aura:iteration var="column" items="{!v.columns}">
-                                <th scope="col" class="slds-cell-wrap">
-                                    <div title="{!column.label}">{!column.label}</div>
-                                </th>
-                            </aura:iteration>
-                        </tr>
-                    </thead>
-                    <tbody>
-
-                        <aura:if isTrue="{! empty( v.selectedFiles ) }">
-                            <tr>
-                                <th colspan="5">
-                                    <div class="slds-text-align_center">No items to display.</div>
-                                </th>
-                            </tr>
-                        </aura:if>
-
-                        <aura:iteration var="file" items="{!v.selectedFiles}" indexVar="fileIndex">
-                            <tr>
-                                <td align="center">
-                                    <div title="{!'Row ' + (fileIndex + 1)}" class="slds-text-body_small slds-text-color--weak slds-text-align_center">
-                                        {!fileIndex + 1}
-                                    </div>
-                                </td>
-                                <th scope="row" data-label="{!file.Title}" class="slds-cell-wrap">
-                                    <div title="{!file.Title}">
-                                        <lightning:icon iconName="{!file.FileTypeIconName}" class="slds-p-right_x-small"/>
-                                        <a href="javascript:void(0);"
-                                           data-fileId="{!file.ContentDocumentId}"
-                                           onclick="{!c.handleFileClick}">
-                                            {!file.Title}
-                                        </a>
-                                    </div>
-                                </th>
-                                <td data-label="Owner" class="slds-cell-wrap">
-                                    <div title="{!file.OwnerName}">
-                                        <a href="javascript:void(0);"
-                                           data-userId="{!file.OwnerId}"
-                                           onclick="{!c.handleUserClick}">
-                                            {!file.OwnerName}
-                                        </a>
-                                    </div>
-                                </td>
-                                <td data-label="Last Modified" class="slds-cell-wrap">
-                                    <div title="{!file.LastModifiedDate}">
-                                        <lightning:formattedDateTime value="{!file.LastModifiedDate}" year="numeric" month="numeric" day="numeric" hour="numeric" minute="numeric"/>
-                                    </div>
-                                </td>
-                                <td data-label="Size" class="slds-cell-wrap">
-                                    <div title="{!file.HumanReadableContentSize}">{!file.HumanReadableContentSize}</div>
-                                </td>
-                            </tr>
-                        </aura:iteration>
-
-                    </tbody>
-                </table>
-
-                <!-- https://releasenotes.docs.salesforce.com/en-us/spring18/release-notes/rn_lc_components.htm -->
-                <!--
                 <lightning:datatable aura:id="datatable"
-                     keyField="Id"
-                     columns="{!v.columns}"
-                     data="{!v.selectedFiles}"
-                     hideCheckboxColumn="true"/>
-                -->
+                    keyField="Id"
+                    columns="{!v.columns}"
+                    data="{!v.selectedFiles}"
+                    hideCheckboxColumn="true"
+                    showRowNumberColumn="true"/>
 
-            </div>
+            </lightning:layoutItem>
 
-        </div>
+        </lightning:layout>
 
     </lightning:card>
 

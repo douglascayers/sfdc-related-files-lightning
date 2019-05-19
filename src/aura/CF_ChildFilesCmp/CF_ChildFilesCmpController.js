@@ -10,15 +10,15 @@ License: BSD 3-Clause License
         var objectName = component.get( 'v.sObjectName' );
         var recordId = component.get( 'v.recordId' );
 
-        helper.getRelatedFilesColumnsAsync( component )
-            .then( $A.getCallback( function( columns ) {
+        Promise.all([
+                helper.getRelatedFilesColumnsAsync( component ),        // FieldSetMember
+                helper.getObjectDescribeAsync( component, objectName )  // DescribeSObjectResult
+            ]).then( $A.getCallback( function( results ) {
 
-                component.set( 'v.columns', columns );
+                var fieldSetColumns = results[0];
+                var objectDescribe = results[1];
 
-                return helper.getObjectDescribeAsync( component, objectName );
-
-            })).then( $A.getCallback( function( objectDescribe ) {
-
+                component.set( 'v.columns', helper.transformToDataTableColumns( fieldSetColumns ) );
                 component.set( 'v.sObjectDescribe', objectDescribe );
 
                 var selectedIndex = component.get( 'v.selectedIndex' );
@@ -62,12 +62,7 @@ License: BSD 3-Clause License
 
             })).catch( $A.getCallback( function( err ) {
 
-               $A.get( 'e.force:showToast' ).setParams({
-                   'title' : 'Sorry, error initializing component',
-                   'message' : err,
-                   'type' : 'error',
-                   'mode': 'sticky'
-               }).fire();
+                helper.toastMessage( 'Sorry, error initializing component', err, 'error' );
 
             }));
 
@@ -90,12 +85,7 @@ License: BSD 3-Clause License
         helper.getRelatedFilesForIndexAsync( component, clickedIndex, false )
             .catch( $A.getCallback( function( err ) {
 
-               $A.get( 'e.force:showToast' ).setParams({
-                   'title' : 'Sorry, error getting files',
-                   'message' : err,
-                   'type' : 'error',
-                   'mode': 'sticky'
-               }).fire();
+                helper.toastMessage( 'Sorry, error getting files', err, 'error' );
 
             }));
 
