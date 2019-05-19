@@ -11,13 +11,21 @@ License: BSD 3-Clause License
 
     <div class="slds-scope">
 
-        <div class="slds-m-vertical_small">
-            Back to <a href='/{!recordId}'>{!record[nameField]}</a>
+        <div class="slds-p-around_large">
+
+            <nav role="navigation" aria-label="Breadcrumbs">
+                <ol class="slds-breadcrumb slds-list_horizontal slds-wrap">
+                    <li class="slds-breadcrumb__item">
+                        <a href="/{!recordId}">{!record[nameField]}</a>
+                    </li>
+                </ol>
+            </nav>
+
+            <div id="container" class="slds-p-vertical_small"></div>
+
         </div>
 
     </div>
-
-    <div id="container"></div>
 
     <script>
 
