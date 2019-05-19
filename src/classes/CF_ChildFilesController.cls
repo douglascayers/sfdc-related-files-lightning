@@ -42,7 +42,7 @@ public with sharing class CF_ChildFilesController {
     /**
      * https://salesforce.stackexchange.com/questions/149788/how-to-efficiently-determine-the-name-field-of-an-sobject-for-dynamic-query?noredirect=1&lq=1
      */
-    private String getNameField( SObjectType sObjectType ) {
+    private static String getNameField( SObjectType sObjectType ) {
 
         String nameField = 'Name';
 
@@ -266,6 +266,8 @@ public with sharing class CF_ChildFilesController {
         fileMap.putAll( new Map<String, Object>{
             'Id' => file.Id,
             'ContentDocumentId' => file.ContentDocumentId,
+            'LinkToContentDocumentId' => URL.getOrgDomainUrl().toExternalForm() + '/' + file.ContentDocumentId,
+            'LinkToContentVersionId' => URL.getOrgDomainUrl().toExternalForm() + '/' + file.Id,
             'Title' => file.Title,
             'OwnerId' => file.OwnerId,
             'OwnerName' => file.Owner.Name,
