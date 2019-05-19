@@ -51,28 +51,19 @@ Packaged Release History
 
 Release 1.2 (current release)
 -----------
-* Install package
-  * [Production URL](https://login.salesforce.com/packaging/installPackage.apexp?p0=)
-  * [Sandbox URL](https://test.salesforce.com/packaging/installPackage.apexp?p0=)
-* Add support for Classic Experience ([issue 10](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/10))
-  * Add provided buttons labeled `View Related Files` to your page layouts, or
-  * Create custom buttons that link to `/apex/CF_ChildFilesPage?id={!YourObject.Id}`
 
-Release 1.1
------------
-* Add support for custom lookup fields on Activities ([issue 2](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/2))
-* For Account records, files related to Tasks and Events that rollup to an Account are included (e.g. `Task.AccountId`, `Event.AccountId`) Example: Files related to a Task that is related to an Opportunity will be visible at the Account level. ([issue 3](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/3)) 
-* Child relationships are now case-insensitive in App Builder ([issue 5](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/5))
+* Install Package
+    * Browser Links ([Production](https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1I000000h81M)) ([Sandbox](https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1I000000h81M))
+    * Salesforce CLI (`sfdx force:package:install --package 04t1I000000h81M --wait 10`)
+* [Closed Issues](https://github.com/douglascayers/sfdc-related-files-lightning/milestone/1?closed=1)
+* [Archived Releases](https://github.com/douglascayers/sfdc-related-files-lightning/milestones?state=closed)
 
-Release 1.0
------------
-* Initial managed package offering
-* Shows all files, grouped by object, accessible by the user that are shared to related child records of the parent record.
 
 Installing the Source Code (Developers)
 ---------------------------------------
 
-You may install the unmanaged code from GitHub and make any desired adjustments. You are responsible for ensuring unit tests meet your org's validation rules and other requirements.
+You may install the source code from GitHub and make any desired adjustments.
+You are responsible for ensuring unit tests meet your org's validation rules and other requirements.
 
 * [Deploy from Github](https://githubsfdeploy.herokuapp.com)
 
