@@ -197,6 +197,123 @@ License: BSD 3-Clause License
 
     },
 
+    transformToDataTableColumns : function( fieldSetColumns ) {
+
+        return fieldSetColumns.map( function( fieldSetColumn ) {
+
+            var dataTableColumn = Object.assign( {}, fieldSetColumn );
+
+            dataTableColumn.cellAttributes = dataTableColumn.cellAttributes || {};
+            dataTableColumn.typeAttributes = dataTableColumn.typeAttributes || {};
+
+            switch ( fieldSetColumn.type.toUpperCase() ) {
+
+                case 'BOOLEAN':
+                    dataTableColumn.type = 'boolean';
+                    break;
+
+                case 'CURRENCY':
+                    dataTableColumn.type = 'currency';
+                    dataTableColumn.cellAttributes.alignment = 'right';
+                    break;
+
+                case 'DOUBLE':
+                case 'INTEGER':
+                case 'LONG':
+                    dataTableColumn.type = 'number';
+                    dataTableColumn.cellAttributes.alignment = 'right';
+                    break;
+
+                case 'PERCENT':
+                    dataTableColumn.type = 'percent';
+                    dataTableColumn.cellAttributes.alignment = 'right';
+                    break;
+
+                case 'STRING':
+                case 'COMBOBOX':
+                case 'PICKLIST':
+                case 'MULTIPICKLIST':
+                case 'TEXTAREA':
+                case 'ENCRYPTEDSTRING':
+                    dataTableColumn.type = 'text';
+                    break;
+
+                case 'PHONE':
+                    dataTableColumn.type = 'phone';
+                    break;
+
+                case 'DATE':
+                    dataTableColumn.type = 'date-local';
+                    break;
+
+                case 'DATETIME':
+                    dataTableColumn.type = 'date';
+                    dataTableColumn.typeAttributes.year = 'numeric';
+                    dataTableColumn.typeAttributes.month = '2-digit';
+                    dataTableColumn.typeAttributes.day = '2-digit';
+                    dataTableColumn.typeAttributes.hour = '2-digit';
+                    dataTableColumn.typeAttributes.minute = '2-digit';
+                    break;
+
+                case 'TIME':
+                    dataTableColumn.type = 'date';
+                    dataTableColumn.typeAttributes.hour = '2-digit';
+                    dataTableColumn.typeAttributes.minute = '2-digit';
+                    break;
+
+                case 'ID':
+                case 'REFERENCE':
+                    // dataTableColumn.type = 'url';
+                    break;
+
+                case 'URL':
+                    dataTableColumn.type = 'url';
+                    break;
+
+                case 'EMAIL':
+                    dataTableColumn.type = 'email';
+                    break;
+
+            }
+
+            if ( dataTableColumn.fieldName === 'Title' ) {
+
+                dataTableColumn.fieldName = 'LinkToContentDocumentId';
+                dataTableColumn.type = 'url';
+
+                dataTableColumn.typeAttributes = Object.assign({
+                    'label' : {
+                        'fieldName' : 'Title'
+                    },
+                    'tooltip' : {
+                        'fieldName' : 'Title'
+                    },
+                    'target' : '_blank'
+                }, dataTableColumn.typeAttributes );
+
+                dataTableColumn.cellAttributes = Object.assign({
+                    'iconName' : {
+                        'fieldName' : 'FileTypeIconName'
+                    }
+                }, dataTableColumn.cellAttributes );
+
+            }
+
+            if ( dataTableColumn.fieldName === 'ContentSize' ) {
+
+                dataTableColumn.fieldName = 'HumanReadableContentSize';
+                dataTableColumn.type = 'text';
+                dataTableColumn.typeAttributes = {}; // unset
+                dataTableColumn.cellAttributes = {}; // unset
+
+            }
+
+            console.log( JSON.stringify( dataTableColumn, null, 2 ) );
+
+            return dataTableColumn;
+        });
+    },
+
     // -----------------------------------------------------------------
 
     showSpinner : function( component ) {
@@ -208,6 +325,26 @@ License: BSD 3-Clause License
     hideSpinner : function( component ) {
 
         $A.util.addClass( component.find( 'spinner' ), 'slds-hide' );
+
+    },
+
+    toastMessage : function( title, message, type ) {
+
+        // https://developer.salesforce.com/docs/atlas.en-us.lightning.meta/lightning/ref_force_showToast.htm
+
+        var helper = this;
+
+        // convenience so code can toast errors without
+        // themselves figuring out how to get the real message from them
+        if ( message instanceof Error ) {
+            message = helper.unwrapAuraErrorMessage( message );
+        }
+
+        $A.get( 'e.force:showToast' ).setParams({
+            title : ( title || 'Message' ),
+            message : ( message || '' ),
+            type : ( type || 'info' )
+        }).fire();
 
     },
 
@@ -313,7 +450,7 @@ License: BSD 3-Clause License
 
                     helper.logActionErrors( response.getError() );
 
-                    reject( response.getError() );
+                    reject( helper.getMessageFromActionResponseError( response.getError() ) );
 
                 }
             });
@@ -332,11 +469,49 @@ License: BSD 3-Clause License
                     console.error( 'Error: ' + errors[i].message );
                 }
             } else {
-                console.error( 'Error: ' + errors );
+                console.error( 'Error: ' + ( errors.message || errors ) );
             }
         } else {
             console.error( 'Unknown error' );
         }
+    },
+
+    getMessageFromActionResponseError : function( errors ) {
+        var text = '';
+        if ( errors ) {
+            if ( errors.length > 0 ) {
+                for ( var i = 0; i < errors.length; i++ ) {
+                    text += '\n' + errors[i].message;
+                }
+            } else {
+                text = ( errors.message || errors );
+            }
+        }
+        return text;
+    },
+
+    /**
+     * When using $A.getCallback() function, if an error is thrown
+     * then it wraps the error in an AuraError. The AuraError, unfortunately,
+     * has a new message property whose value is "Error in $A.getCallback[YOUR_ORIGINAL_ERROR_MESSAGE]".
+     * The only way to obtain YOUR_ORIGINAL_ERROR_MESSAGE is to substring
+     * the AuraError text out of its message.
+     */
+    unwrapAuraErrorMessage : function( err ) {
+
+        var message = err.message;
+
+        var startStr = 'Error in $A.getCallback() [';
+        var endStr = ']';
+
+        var startIdx = err.message.indexOf( startStr );
+        var endIdx = err.message.lastIndexOf( endStr );
+
+        if ( startIdx >= 0 && endIdx >= 0 ) {
+            message = err.message.substring( startIdx + startStr.length, endIdx );
+        }
+
+        return message;
     }
 })
 /*
