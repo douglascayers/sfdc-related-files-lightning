@@ -95,8 +95,13 @@ public with sharing class CF_ChildFilesController {
 
                 for ( FieldSetMember fsm : fs.getFields() ) {
 
+                    // standard lookup field labels sometimes include the suffix " ID", but in the UI they rarely do,
+                    // so to mimic what the user's are accustomed to then substring the suffix away.
+                    Boolean isCustom = ( fsm.getFieldPath().endsWithIgnoreCase( '__c' ) );
+                    String fieldLabel = ( isCustom ? fsm.getLabel() : fsm.getLabel().substringBeforeLast( ' ID' ) );
+
                     columns.add( new Map<String, String>{
-                        'label' => fsm.getLabel(),
+                        'label' => fieldLabel,
                         'fieldName' => fsm.getFieldPath().remove( '.' ), // Owner.Name => OwnerName
                         'fieldPath' => fsm.getFieldPath(),
                         'type' => String.valueOf( fsm.getType() ).toUpperCase()
@@ -125,10 +130,10 @@ public with sharing class CF_ChildFilesController {
         });
 
         columns.add( new Map<String, String>{
-            'label' => 'Owner Name',
-            'fieldName' => 'OwnerName',
-            'fieldPath' => 'Owner.Name',
-            'type' => 'STRING'
+            'label' => 'Owner',
+            'fieldName' => 'OwnerId',
+            'fieldPath' => 'OwnerId',
+            'type' => 'REFERENCE'
         });
 
         columns.add( new Map<String, String>{
@@ -248,12 +253,15 @@ public with sharing class CF_ChildFilesController {
 
                     }
 
-                    String objectNameField = getNameField( objectType );
+                    DescribeFieldResult nameFieldDesc = objectType.getDescribe().fields.getMap().get( getNameField( objectType ) ).getDescribe();
+                    // standard lookup field labels sometimes include the suffix " ID", but in the UI they rarely do,
+                    // so to mimic what the user's are accustomed to then substring the suffix away.
+                    String nameFieldLabel = ( nameFieldDesc.isCustom() ? nameFieldDesc.getLabel() : nameFieldDesc.getLabel().substringBeforeLast( ' ID' ) );
                     additionalColumns.add( new Map<String, String>{
                         'type' => 'STRING',
-                        'fieldPath' => fieldPathToNameField + '.' + objectNameField,
+                        'fieldPath' => fieldPathToNameField + '.' + nameFieldDesc.getName(),
                         'fieldName' => fieldPathToNameField.remove( '.' ) + 'Name',
-                        'label' => objectType.getDescribe().fields.getMap().get( objectNameField ).getDescribe().getLabel()
+                        'label' => nameFieldLabel
                     });
 
                 }

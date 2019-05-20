@@ -30,7 +30,7 @@ private class CF_ChildFilesControllerTest {
 
         Test.startTest();
 
-        relatedFiles = CF_ChildFilesController.getRelatedFiles( 'Tasks', 'LookedUpFromActivity', 'AccountId', acct.id, 'FILES_AND_NOTES' );
+        relatedFiles = CF_ChildFilesController.getRelatedFiles( 'Tasks', 'LookedUpFromActivity', 'AccountId', acct.id, 'FILES_AND_NOTES', '' );
         System.assertEquals( 0, relatedFiles.size() );
 
         ContentVersion newFile1 = new ContentVersion(
@@ -49,7 +49,7 @@ private class CF_ChildFilesControllerTest {
 
         insert new ContentVersion[] { newFile1, newFile2 };
 
-        relatedFiles = CF_ChildFilesController.getRelatedFiles( 'Tasks', 'LookedUpFromActivity', 'AccountId', acct.id, 'FILES_AND_NOTES' );
+        relatedFiles = CF_ChildFilesController.getRelatedFiles( 'Tasks', 'LookedUpFromActivity', 'AccountId', acct.id, 'FILES_AND_NOTES', '' );
         System.assertEquals( 2, relatedFiles.size() );
 
         Test.stopTest();
@@ -79,7 +79,7 @@ private class CF_ChildFilesControllerTest {
 
         Test.startTest();
 
-        relatedFiles = CF_ChildFilesController.getRelatedFiles( 'Contacts', 'Contact', 'AccountId', acct.id, 'FILES_AND_NOTES' );
+        relatedFiles = CF_ChildFilesController.getRelatedFiles( 'Contacts', 'Contact', 'AccountId', acct.id, 'FILES_AND_NOTES', '' );
         System.assertEquals( 0, relatedFiles.size() );
 
         ContentVersion newFile1 = new ContentVersion(
@@ -98,14 +98,14 @@ private class CF_ChildFilesControllerTest {
 
         insert new ContentVersion[] { newFile1, newFile2 };
 
-        relatedFiles = CF_ChildFilesController.getRelatedFiles( 'Contacts', 'Contact', 'AccountId', acct.id, 'FILES_AND_NOTES' );
+        relatedFiles = CF_ChildFilesController.getRelatedFiles( 'Contacts', 'Contact', 'AccountId', acct.id, 'FILES_AND_NOTES', '' );
         System.assertEquals( 2, relatedFiles.size() );
 
-        relatedFiles = CF_ChildFilesController.getRelatedFiles( 'Contacts', 'Contact', 'AccountId', acct.id, 'FILES_ONLY' );
+        relatedFiles = CF_ChildFilesController.getRelatedFiles( 'Contacts', 'Contact', 'AccountId', acct.id, 'FILES_ONLY', '' );
         System.assertEquals( 1, relatedFiles.size() );
         System.assertEquals( newFile1.Id, relatedFiles[0].get( 'Id' ) );
 
-        relatedFiles = CF_ChildFilesController.getRelatedFiles( 'Contacts', 'Contact', 'AccountId', acct.id, 'NOTES_ONLY' );
+        relatedFiles = CF_ChildFilesController.getRelatedFiles( 'Contacts', 'Contact', 'AccountId', acct.id, 'NOTES_ONLY', '' );
         System.assertEquals( 1, relatedFiles.size() );
         System.assertEquals( newFile2.Id, relatedFiles[0].get( 'Id' ) );
 
@@ -143,7 +143,7 @@ private class CF_ChildFilesControllerTest {
 
         System.assertEquals( 4, defaultColumns.size() );
         System.assertEquals( 'Title', defaultColumns[0].get( 'label' ) );
-        System.assertEquals( 'Owner Name', defaultColumns[1].get( 'label' ) );
+        System.assertEquals( 'Owner', defaultColumns[1].get( 'label' ) );
         System.assertEquals( 'Last Modified', defaultColumns[2].get( 'label' ) );
         System.assertEquals( 'Size', defaultColumns[3].get( 'label' ) );
 
