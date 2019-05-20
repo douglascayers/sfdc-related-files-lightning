@@ -7,7 +7,7 @@ License: BSD 3-Clause License
 <aura:component controller="CF_ChildFilesController" implements="flexipage:availableForRecordHome,force:hasRecordId,force:hasSObjectName" access="global">
 
     <aura:attribute name="sObjectDescribe"
-                    type="Object"
+                    type="Map"
                     description="SObject and Field describe info"/>
 
     <aura:attribute name="sObjectName"
@@ -24,13 +24,25 @@ License: BSD 3-Clause License
                     access="global"
                     description="Title of the lightning:card component wrapping content."/>
 
+    <aura:attribute name="filesAndNotesFilter"
+                    type="String"
+                    default="FILES_AND_NOTES"
+                    access="global"
+                    description="Determines if component displays FILES_ONLY, NOTES_ONLY, or FILES_AND_NOTES."/>
+
+    <aura:attribute name="fieldSetName"
+                    type="String"
+                    default=""
+                    access="global"
+                    description="Determines the fields to display from ContentVersion object. If blank then a default set of fields are displayed."/>
+
     <aura:attribute name="childRelationshipNames"
                     type="String"
                     access="global"
                     description="Comma-separated list of child relationship API names provided by design attributes in App Builder."/>
 
     <aura:attribute name="childRelationshipFiles"
-                    type="Object[]"
+                    type="Map[]"
                     description="Array of wrapper objects that denote the child relationship name, describe info, and list of shared files. The main content that is displayed in this component."/>
 
     <aura:attribute name="selectedIndex"
@@ -39,27 +51,47 @@ License: BSD 3-Clause License
                     description="Index in 'childRelationshipFiles' array of the selected relationship. Indicates which relationship is highlighted as active in the vertical nav list."/>
 
     <aura:attribute name="selectedFiles"
-                    type="Object[]"
+                    type="Map[]"
                     description="Array of files shared to records of the selected relationship. These are the files displayed in the component."/>
 
     <aura:attribute name="selectedRelationship"
                     type="Object"
                     description="Element in 'childRelationshipFiles' at the selected index."/>
 
+    <aura:attribute name="columns"
+                    type="Map[]"
+                    description="The table columns to display. Intended for lightning:datatable component."/>
+
+    <aura:attribute name="sortedByFieldName"
+                    type="String"
+                    description="Which column the datatable is currently sorted by."/>
+
+    <aura:attribute name="sortedDirection"
+                    type="String"
+                    description="Which direction the datatable is sorted, asc or desc."/>
+
     <!-- Events -->
 
-    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="init" value="{!this}" action="{!c.onInit}"/>
 
     <!-- Markup -->
 
     <lightning:spinner aura:id="init-spinner" variant="brand" class="slds-hide"/>
     <lightning:spinner aura:id="spinner" variant="brand" class="slds-hide"/>
 
-    <lightning:card iconName="{!( empty(v.componentCardTitle) ? '' : 'standard:file' )}" title="{!v.componentCardTitle}">
+    <lightning:card iconName="{!( empty(v.componentCardTitle) ? '' : 'standard:file' )}" class="slds-card_boundary">
 
-        <div class="slds-grid">
+        <aura:set attribute="title">
+            <span class="slds-card__header-title">
+                <span class="slds-card__header-link">
+                    {!v.componentCardTitle}
+                </span>
+            </span>
+        </aura:set>
 
-            <div class="slds-col slds-size_1-of-4 slds-m-horizontal_small slds-p-right_small slds-border_right">
+        <lightning:layout>
+
+            <lightning:layoutItem size="3" class="slds-m-horizontal_small slds-p-right_small slds-border_right">
 
                 <nav class="slds-nav-vertical slds-box cf-relationship-nav" aria-label="{!v.componentCardTitle}">
                     <div class="slds-nav-vertical__section">
@@ -69,11 +101,10 @@ License: BSD 3-Clause License
                                     <a href="javascript:void(0);"
                                        class="slds-nav-vertical__action"
                                        title="{!relationship.describe.objectLabelPlural + ' (' + relationship.name + ')'}"
-                                       aria-describedby="entity-header"
                                        data-index="{!index}"
-                                       onclick="{!c.handleChildRelationshipClick}">
+                                       onclick="{!c.onChildRelationshipClick}">
 
-                                        {!relationship.describe.objectLabelPlural}
+                                        {!relationship.describe.relationshipLabel}
 
                                         <span class="{! 'slds-badge slds-col_bump-left ' + if( greaterthan( relationship.files.length, 0 ), 'slds-theme_success', '' )}">
                                             <span class="slds-assistive-text">:</span>
@@ -88,83 +119,20 @@ License: BSD 3-Clause License
                     </div>
                 </nav>
 
-            </div>
+            </lightning:layoutItem>
 
-            <div class="slds-col slds-size_3-of-4 slds-p-right_small">
+            <lightning:layoutItem class="slds-p-right_small">
 
-                <table class="slds-table slds-table_bordered">
-                    <thead>
-                        <tr class="slds-text-title_caps">
-                            <th scope="col" class="slds-cell-wrap">
-                                &nbsp;
-                            </th>
-                            <th scope="col" class="slds-cell-wrap">
-                                <div title="Title">Title</div>
-                            </th>
-                            <th scope="col" class="slds-cell-wrap">
-                                <div title="Owner">Owner</div>
-                            </th>
-                            <th scope="col" class="slds-cell-wrap">
-                                <div title="Last Modified">Last Modified</div>
-                            </th>
-                            <th scope="col" class="slds-cell-wrap">
-                                <div title="Size">Size</div>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                <lightning:datatable aura:id="datatable"
+                    keyField="Id"
+                    columns="{!v.columns}"
+                    data="{!v.selectedFiles}"
+                    hideCheckboxColumn="true"
+                    showRowNumberColumn="true"/>
 
-                        <aura:if isTrue="{! empty( v.selectedFiles ) }">
-                            <tr>
-                                <th colspan="5">
-                                    <div class="slds-text-align_center">No items to display.</div>
-                                </th>
-                            </tr>
-                        </aura:if>
+            </lightning:layoutItem>
 
-                        <aura:iteration var="file" items="{!v.selectedFiles}" indexVar="fileIndex">
-                            <tr>
-                                <td align="center">
-                                    <div title="{!'Row ' + (fileIndex + 1)}" class="slds-text-body_small slds-text-color--weak slds-text-align_center">
-                                        {!fileIndex + 1}
-                                    </div>
-                                </td>
-                                <th scope="row" data-label="{!file.Title}" class="slds-cell-wrap">
-                                    <div title="{!file.Title}">
-                                        <lightning:icon iconName="{!file.FileTypeIconName}" class="slds-p-right_x-small"/>
-                                        <a href="javascript:void(0);"
-                                           data-fileId="{!file.ContentDocumentId}"
-                                           onclick="{!c.handleFileClick}">
-                                            {!file.Title}
-                                        </a>
-                                    </div>
-                                </th>
-                                <td data-label="Owner" class="slds-cell-wrap">
-                                    <div title="{!file.OwnerName}">
-                                        <a href="javascript:void(0);"
-                                           data-userId="{!file.OwnerId}"
-                                           onclick="{!c.handleUserClick}">
-                                            {!file.OwnerName}
-                                        </a>
-                                    </div>
-                                </td>
-                                <td data-label="Last Modified" class="slds-cell-wrap">
-                                    <div title="{!file.LastModifiedDateTimestamp}">
-                                        <lightning:formattedDateTime value="{!file.LastModifiedDateTimestamp}" year="numeric" month="numeric" day="numeric" hour="numeric" minute="numeric"/>
-                                    </div>
-                                </td>
-                                <td data-label="Size" class="slds-cell-wrap">
-                                    <div title="{!file.HumanReadableContentSize}">{!file.HumanReadableContentSize}</div>
-                                </td>
-                            </tr>
-                        </aura:iteration>
-
-                    </tbody>
-                </table>
-
-            </div>
-
-        </div>
+        </lightning:layout>
 
     </lightning:card>
 
@@ -172,7 +140,7 @@ License: BSD 3-Clause License
 <!--
 BSD 3-Clause License
 
-Copyright (c) 2017, Doug Ayers
+Copyright (c) 2019, Doug Ayers
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

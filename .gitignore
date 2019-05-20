@@ -1,1 +1,5 @@
+.sfdx
+.vscode
 *.iml
+.idea
+IlluminatedCloud

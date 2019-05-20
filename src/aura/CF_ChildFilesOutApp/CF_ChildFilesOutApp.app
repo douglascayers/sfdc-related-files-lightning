@@ -1,14 +1,15 @@
-/*
+<!--
 Author: Doug Ayers
 Website: https://douglascayers.com
 GitHub: https://github.com/DouglasCAyers/sfdc-related-files-lightning
 License: BSD 3-Clause License
-*/
-.THIS .cf-relationship-nav {
-    padding: 0;
-    background-color: token(colorBackgroundChromeDesktop);
-}
-/*
+-->
+<aura:application access="GLOBAL" extends="ltng:outApp">
+
+    <aura:dependency resource="c:CF_ChildFilesCmp"/>
+
+</aura:application>
+<!--
 BSD 3-Clause License
 
 Copyright (c) 2019, Doug Ayers
@@ -38,4 +39,4 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+-->

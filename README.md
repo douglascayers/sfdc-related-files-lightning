@@ -49,47 +49,23 @@ Seeing a need I began developing this app. After [sharing a sneak peek](https://
 Packaged Release History
 ------------------------
 
-Release 1.1 (current release)
+Release 1.2 (current release)
 -----------
-* Install package
-  * [Production URL](https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1I000000h81M)
-  * [Sandbox URL](https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1I000000h81M)
-* Add support for custom lookup fields on Activities ([issue 2](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/2))
-* For Account records, files related to Tasks and Events that rollup to an Account are included (e.g. `Task.AccountId`, `Event.AccountId`) Example: Files related to a Task that is related to an Opportunity will be visible at the Account level. ([issue 3](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/3)) 
-* Child relationships are now case-insensitive in App Builder ([issue 5](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/5))
+
+* Install Package
+    * Browser Links ([Production](https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1I000000iBEO)) ([Sandbox](https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1I000000iBEO))
+    * Salesforce CLI (`sfdx force:package:install --package 04t1I000000iBEO --wait 10`)
+* [Closed Issues](https://github.com/douglascayers/sfdc-related-files-lightning/milestone/1?closed=1)
+* [Archived Releases](https://github.com/douglascayers/sfdc-related-files-lightning/milestones?state=closed)
+
 
 Installing the Source Code (Developers)
 ---------------------------------------
 
-You may install the unmanaged code from GitHub and make any desired adjustments. You are responsible for ensuring unit tests meet your org's validation rules and other requirements.
+You may install the source code from GitHub and make any desired adjustments.
+You are responsible for ensuring unit tests meet your org's validation rules and other requirements.
 
-1. Install the [Salesforce CLI](https://developer.salesforce.com/tools/sfdxcli).
-
-2. Clone this repository.
-
-```
-git clone https://github.com/douglascayers/sfdc-related-files-lightning.git
-```
-
-3. Change directory into the project folder.
-
-```
-cd sfdc-related-files-lightning
-```
-
-4. Authorize your org with Salesforce CLI using the following command, replacing **YourOrgAlias** with an alias of your choice.
-
-```
-sfdx force:auth:web:login --setalias YourOrgAlias --setdefaultusername
-```
-
-> If connecting to a sandbox, add the `--instanceurl https://test.salesforce.com` argument to the above command.
-
-5. Deploy metadata to your org with Salesforce CLI using the following command, replacing **YourOrgAlias** with the alias you provided in step 3 above. When deploying to production, you may need to either (a) update the code or (b) relax validation rules if any of the apex tests in this package fail during installation. If you install the [managed package](https://github.com/douglascayers/sfdc-related-files-lightning#packaged-release-history), you skip this headache.
-
-```
-sfdx force:mdapi:deploy --deploydir src --targetusername YourOrgAlias --wait 10
-```
+* [Deploy from Github](https://githubsfdeploy.herokuapp.com)
 
 ---
 
@@ -116,7 +92,7 @@ Recommendations
 FAQ
 ===
 
-If one of your questions isn't answered below, please search and comment on [existing issues](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues?utf8=%E2%9C%93&q=is%3Aissue) before opening a new one. Thanks! 
+If one of your questions isn't answered below, please search and comment on [existing issues](/issues?utf8=%E2%9C%93&q=is%3Aissue) before opening a new one. Thanks! 
 
 Which files are shown in the Lightning Component?
 -------------------------------------------------
@@ -142,7 +118,8 @@ you might enter "`Contacts,Invoices__r`".
 
 To determine a child relationship name, in Setup use Object Manager to navigate to your child object (e.g. `Contact` or `Invoice__c`)
 then navigate to the lookup field that points to the parent object (that is the object whose Lightning Record Page you're adding this component).
-On the field's detail page you'll see the field label, field name, and the child relationship name (use this value in App Bulider). If this is a custom lookup or master-detail field then [you will need to append `__r` to the child relationship name](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/13).
+On the field's detail page you'll see the field label, field name, and the child relationship name (use this value in App Bulider).
+If this is a custom lookup or master-detail field then [you will need to append `__r` to the child relationship name](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/13).
 
 ![screen shot](images/setup-child-relationship-field-name.png)
 
@@ -156,6 +133,23 @@ when viewing this **Related Files** lightning component on that account page wou
 for the `Contacts` relationship even though 3 contacts exist because only 1 unique file was shared among them.
 
 ![screen shot](images/related-files-badge-counts.png)
+
+How do I use this app in Classic?
+---------------------------------
+
+Add the provided buttons labeled `View Related Files` to your page layouts, or
+create your own custom buttons that link to `/apex/CF_ChildFilesPage?id={!YourObject.Id}`.
+
+The Visualforce page supports these URL parameters to customize the component:
+
+| Parameters | Examples | Required? | Default |
+|-----------|-----------|-----------|---------|
+| id        | 15 or 18 character sobject record id | yes | |
+| r         | To customize which related lists are shown in the vertical navigation then specify a comma-separated list of the API name(s) of the child relationships whose files to show. | no | blank, shows all child relationships |
+| f         | To filter if Files and/or Enhanced Notes are displayed in the lists then specify `FILES_ONLY`, `NOTES_ONLY`, or `FILES_AND_NOTES` | no | `FILES_AND_NOTES` |
+
+Example:
+  * `/apex/CF_ChildFilesPage?id=0011I00000345FD&r=Contacts,Invoices__r&f=FILES_ONLY`
 
 I don't see Attachments from related records like in Classic, what gives?
 -------------------------------------------------------------------------

@@ -5,17 +5,25 @@ GitHub: https://github.com/DouglasCAyers/sfdc-related-files-lightning
 License: BSD 3-Clause License
 */
 ({
-    doInit : function( component, event, helper ) {
+    onInit : function( component, event, helper ) {
 
         var objectName = component.get( 'v.sObjectName' );
         var recordId = component.get( 'v.recordId' );
+        var fieldSetName = component.get( 'v.fieldSetName' );
 
-        helper.getObjectDescribeAsync( component, objectName )
-            .then( $A.getCallback( function( objectDescribe ) {
+        Promise.all([
+                helper.getRelatedFilesColumnsAsync( component, fieldSetName ),        // FieldSetMember
+                helper.getObjectDescribeAsync( component, objectName )  // DescribeSObjectResult
+            ]).then( $A.getCallback( function( results ) {
 
+                var fieldSetColumns = results[0];
+                var objectDescribe = results[1];
+
+                component.set( 'v.columns', helper.transformToDataTableColumns( fieldSetColumns ) );
                 component.set( 'v.sObjectDescribe', objectDescribe );
 
                 var selectedIndex = component.get( 'v.selectedIndex' );
+                var filesAndNotesFilter = component.get( 'v.filesAndNotesFilter' );
                 var childRelationshipNames = component.get( 'v.childRelationshipNames' );
                 var childRelationshipFiles = [];
 
@@ -55,18 +63,32 @@ License: BSD 3-Clause License
 
             })).catch( $A.getCallback( function( err ) {
 
-               $A.get( 'e.force:showToast' ).setParams({
-                   'title' : 'Sorry, error initializing component',
-                   'message' : err,
-                   'type' : 'error',
-                   'mode': 'sticky'
-               }).fire();
+                helper.toastMessage( 'Sorry, error initializing component', err, 'error' );
 
             }));
 
     },
 
-    handleChildRelationshipClick : function( component, event, helper ) {
+    onDataTableSort : function( component, event, helper ) {
+
+        var sortedByFieldName = event.getParam( 'fieldName' );
+        var sortedDirection = event.getParam( 'sortDirection' );
+
+        component.set( 'v.sortedByFieldName', sortedByFieldName );
+        component.set( 'v.sortedDirection', sortedDirection );
+
+        // TODO implement sort
+        // things to consider,
+        //      when field name starts with 'LinkTo' then
+        //      the real field name is that without the 'LinkTo' prefix,
+        //      and since that field refers to a lookup field, what we
+        //      really want to sort by is that referenced object's "name" field.
+        //      For example:
+        //          "LinkToOwnerId" => "OwnerId" => "Owner.Name"
+
+    },
+
+    onChildRelationshipClick : function( component, event, helper ) {
 
         var childRelationshipFiles = component.get( 'v.childRelationshipFiles' );
         var selectedIndex = component.get( 'v.selectedIndex' );
@@ -83,29 +105,22 @@ License: BSD 3-Clause License
         helper.getRelatedFilesForIndexAsync( component, clickedIndex, false )
             .catch( $A.getCallback( function( err ) {
 
-               $A.get( 'e.force:showToast' ).setParams({
-                   'title' : 'Sorry, error getting files',
-                   'message' : err,
-                   'type' : 'error',
-                   'mode': 'sticky'
-               }).fire();
+                helper.toastMessage( 'Sorry, error getting files', err, 'error' );
 
             }));
 
     },
 
-    handleFileClick : function( component, event, helper ) {
+    onFileClick : function( component, event, helper ) {
 
         var clickedFileId = event.srcElement.getAttribute( 'data-fileId' );
+        var fileIds = component.get( 'v.selectedFiles' ).map( function( file ) { return file.ContentDocumentId; } );
 
-        $A.get( 'e.lightning:openFiles' ).fire({
-            recordIds : component.get( 'v.selectedFiles' ).map( function( file ) { return file.ContentDocumentId; } ),
-            selectedRecordId : clickedFileId
-        });
+        helper.navigateToFiles( clickedFileId, fileIds );
 
     },
 
-    handleUserClick : function( component, event, helper ) {
+    onUserClick : function( component, event, helper ) {
 
         var clickedUserId = event.srcElement.getAttribute( 'data-userId' );
 
@@ -116,7 +131,7 @@ License: BSD 3-Clause License
 /*
 BSD 3-Clause License
 
-Copyright (c) 2017, Doug Ayers
+Copyright (c) 2019, Doug Ayers
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

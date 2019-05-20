@@ -1,14 +1,23 @@
-/*
+<!--
 Author: Doug Ayers
 Website: https://douglascayers.com
 GitHub: https://github.com/DouglasCAyers/sfdc-related-files-lightning
 License: BSD 3-Clause License
-*/
-.THIS .cf-relationship-nav {
-    padding: 0;
-    background-color: token(colorBackgroundChromeDesktop);
+ -->
+<apex:page controller="CF_VisualforceDomainController"
+           contentType="application/json"
+           showHeader="false"
+           showChat="false"
+           sideBar="false"
+           applyHtmlTag="false"
+           applyBodyTag="false">
+{
+    "sessionId" : "{!$Api.Session_ID}",
+    "orgDomainURL" : "{!orgDomainURL}",
+    "visualforceDomainURL" : "{!visualforceDomainURL}"
 }
-/*
+</apex:page>
+<!--
 BSD 3-Clause License
 
 Copyright (c) 2019, Doug Ayers
@@ -38,4 +47,4 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+-->

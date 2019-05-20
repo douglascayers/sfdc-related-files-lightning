@@ -4,9 +4,14 @@ Website: https://douglascayers.com
 GitHub: https://github.com/DouglasCAyers/sfdc-related-files-lightning
 License: BSD 3-Clause License
 */
-.THIS .cf-relationship-nav {
-    padding: 0;
-    background-color: token(colorBackgroundChromeDesktop);
+public with sharing class CF_NamespaceUtils {
+
+    private static final String MY_NAMESPACE = [ SELECT NamespacePrefix FROM ApexClass WHERE Name = 'CF_NamespaceUtils' LIMIT 1 ].NamespacePrefix;
+
+    public static final String NAMESPACE = String.isBlank( MY_NAMESPACE ) ? '' : MY_NAMESPACE;
+
+    public static final String NAMESPACE_API = String.isBlank( MY_NAMESPACE ) ? '' : MY_NAMESPACE + '__';
+
 }
 /*
 BSD 3-Clause License

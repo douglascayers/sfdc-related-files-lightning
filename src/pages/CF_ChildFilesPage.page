@@ -1,14 +1,56 @@
-/*
+<!--
 Author: Doug Ayers
 Website: https://douglascayers.com
 GitHub: https://github.com/DouglasCAyers/sfdc-related-files-lightning
 License: BSD 3-Clause License
-*/
-.THIS .cf-relationship-nav {
-    padding: 0;
-    background-color: token(colorBackgroundChromeDesktop);
-}
-/*
+-->
+<apex:page controller="CF_ChildFilesController" lightningStylesheets="true">
+
+    <apex:slds />
+    <apex:includeLightning />
+
+    <div class="slds-scope">
+
+        <div class="slds-p-around_large">
+
+            <nav role="navigation" aria-label="Breadcrumbs">
+                <ol class="slds-breadcrumb slds-list_horizontal slds-wrap">
+                    <li class="slds-breadcrumb__item">
+                        <a href="/{!recordId}">{!record[nameField]}</a>
+                    </li>
+                </ol>
+            </nav>
+
+            <div id="container" class="slds-p-vertical_small"></div>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        let namespace = '{!orgNamespace}' || 'c';
+
+        $Lightning.use( namespace + ':CF_ChildFilesOutApp', function() {
+            $Lightning.createComponent(
+                namespace + ':CF_ChildFilesCmp',
+                {
+                    'recordId' : '{!recordId}',
+                    'sObjectName' : '{!sObjectName}',
+                    'childRelationshipNames' : '{!$CurrentPage.parameters.r}',
+                    'filesAndNotesFilter' : '{!$CurrentPage.parameters.f}'
+                },
+                'container',
+                function( newCmp ) {
+
+                }
+            );
+        });
+
+    </script>
+
+</apex:page>
+<!--
 BSD 3-Clause License
 
 Copyright (c) 2019, Doug Ayers
@@ -38,4 +80,4 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+-->

@@ -48,12 +48,14 @@ License: BSD 3-Clause License
         var recordId = component.get( 'v.recordId' );
         var objectDescribe = component.get( 'v.sObjectDescribe' );
         var childRelationshipFiles = component.get( 'v.childRelationshipFiles' );
+        var filesAndNotesFilter = component.get( 'v.filesAndNotesFilter' );
+        var fieldSetName = component.get( 'v.fieldSetName' );
 
         var relationshipName = childRelationshipFiles[index].name;
         var objectName = objectDescribe.childRelationships[relationshipName].objectName;
         var fieldName = objectDescribe.childRelationships[relationshipName].fieldName;
 
-        return helper.getRelatedFilesAsync( component, relationshipName, objectName, fieldName, recordId, runInBackground )
+        return helper.getRelatedFilesAsync( component, relationshipName, objectName, fieldName, recordId, filesAndNotesFilter, fieldSetName, runInBackground )
             .then( $A.getCallback( function( response ) {
 
                 var childRelationshipFiles = component.get( 'v.childRelationshipFiles' );
@@ -77,7 +79,7 @@ License: BSD 3-Clause License
 
     },
 
-    getRelatedFilesAsync : function( component, relationshipName, objectName, fieldName, fieldValue, background ) {
+    getRelatedFilesAsync : function( component, relationshipName, objectName, fieldName, fieldValue, filesAndNotesFilter, fieldSetName, background ) {
 
         var helper = this;
 
@@ -86,12 +88,13 @@ License: BSD 3-Clause License
             'relationshipName' : relationshipName,
             'objectName' : objectName,
             'fieldName' : fieldName,
-            'fieldValue' : fieldValue
+            'fieldValue' : fieldValue,
+            'filesAndNotesFilter' : filesAndNotesFilter,
+            'fieldSetName' : fieldSetName
 
         }, {
 
-            'background' : background,
-            'storable' : true
+            'background' : background
 
         }).then( $A.getCallback( function( files ) {
 
@@ -100,6 +103,18 @@ License: BSD 3-Clause License
             };
 
         }));
+
+    },
+
+    getRelatedFilesColumnsAsync : function( component, fieldSetName ) {
+
+        var helper = this;
+
+        return helper.enqueueAction( component, 'c.getRelatedFilesColumns', {
+
+            'fieldSetName' : fieldSetName
+
+        });
 
     },
 
@@ -112,9 +127,9 @@ License: BSD 3-Clause License
         }
 
         childRelationships.sort( function( a, b ) {
-            if ( a.objectLabelPlural.toUpperCase() < b.objectLabelPlural.toUpperCase() ) {
+            if ( a.relationshipLabel.toUpperCase() < b.relationshipLabel.toUpperCase() ) {
                 return -1;
-            } else if ( a.objectLabelPlural.toUpperCase() > b.objectLabelPlural.toUpperCase() ) {
+            } else if ( a.relationshipLabel.toUpperCase() > b.relationshipLabel.toUpperCase() ) {
                 return 1;
             } else {
                 return 0;
@@ -190,6 +205,136 @@ License: BSD 3-Clause License
 
     },
 
+    transformToDataTableColumns : function( fieldSetColumns ) {
+
+        return fieldSetColumns.map( function( fieldSetColumn ) {
+
+            var dataTableColumn = Object.assign( {}, fieldSetColumn );
+
+            dataTableColumn.cellAttributes = dataTableColumn.cellAttributes || {};
+            dataTableColumn.typeAttributes = dataTableColumn.typeAttributes || {};
+
+            switch ( fieldSetColumn.type.toUpperCase() ) {
+
+                case 'BOOLEAN':
+                    dataTableColumn.type = 'boolean';
+                    break;
+
+                case 'CURRENCY':
+                    dataTableColumn.type = 'currency';
+                    dataTableColumn.cellAttributes.alignment = 'right';
+                    break;
+
+                case 'DOUBLE':
+                case 'INTEGER':
+                case 'LONG':
+                    dataTableColumn.type = 'number';
+                    dataTableColumn.cellAttributes.alignment = 'right';
+                    break;
+
+                case 'PERCENT':
+                    dataTableColumn.type = 'percent';
+                    dataTableColumn.cellAttributes.alignment = 'right';
+                    break;
+
+                case 'STRING':
+                case 'COMBOBOX':
+                case 'PICKLIST':
+                case 'MULTIPICKLIST':
+                case 'TEXTAREA':
+                case 'ENCRYPTEDSTRING':
+                    dataTableColumn.type = 'text';
+                    break;
+
+                case 'PHONE':
+                    dataTableColumn.type = 'phone';
+                    break;
+
+                case 'DATE':
+                    dataTableColumn.type = 'date-local';
+                    break;
+
+                case 'DATETIME':
+                    dataTableColumn.type = 'date';
+                    dataTableColumn.typeAttributes.year = 'numeric';
+                    dataTableColumn.typeAttributes.month = '2-digit';
+                    dataTableColumn.typeAttributes.day = '2-digit';
+                    dataTableColumn.typeAttributes.hour = '2-digit';
+                    dataTableColumn.typeAttributes.minute = '2-digit';
+                    break;
+
+                case 'TIME':
+                    dataTableColumn.type = 'date';
+                    dataTableColumn.typeAttributes.hour = '2-digit';
+                    dataTableColumn.typeAttributes.minute = '2-digit';
+                    break;
+
+                case 'ID':
+                case 'REFERENCE':
+                    var origFieldName = dataTableColumn.fieldName;
+                    var pathToNameField = (
+                        origFieldName.endsWith( 'Id' ) ? origFieldName.slice( 0, -2 ) :
+                        origFieldName.endsWith( '__c' ) ? origFieldName.replace( '__c', '__r' ) : ''
+                    ) + 'Name';
+                    dataTableColumn.fieldName = 'LinkTo' + origFieldName;
+                    dataTableColumn.type = 'url';
+                    dataTableColumn.typeAttributes = Object.assign({
+                        'label' : {
+                            'fieldName' : pathToNameField
+                        },
+                        'tooltip' : {
+                            'fieldName' : pathToNameField
+                        },
+                        'target' : '_blank'
+                    }, dataTableColumn.typeAttributes );
+                    break;
+
+                case 'URL':
+                    dataTableColumn.type = 'url';
+                    break;
+
+                case 'EMAIL':
+                    dataTableColumn.type = 'email';
+                    break;
+
+            }
+
+            if ( dataTableColumn.fieldName === 'Title' ) {
+
+                dataTableColumn.fieldName = 'LinkToContentDocumentId';
+                dataTableColumn.type = 'url';
+
+                dataTableColumn.typeAttributes = Object.assign({
+                    'label' : {
+                        'fieldName' : 'Title'
+                    },
+                    'tooltip' : {
+                        'fieldName' : 'Title'
+                    },
+                    'target' : '_blank'
+                }, dataTableColumn.typeAttributes );
+
+                dataTableColumn.cellAttributes = Object.assign({
+                    'iconName' : {
+                        'fieldName' : 'FileTypeIconName'
+                    }
+                }, dataTableColumn.cellAttributes );
+
+            }
+
+            if ( dataTableColumn.fieldName === 'ContentSize' ) {
+
+                dataTableColumn.fieldName = 'HumanReadableContentSize';
+                dataTableColumn.type = 'text';
+                dataTableColumn.typeAttributes = {}; // unset
+                dataTableColumn.cellAttributes = {}; // unset
+
+            }
+
+            return dataTableColumn;
+        });
+    },
+
     // -----------------------------------------------------------------
 
     showSpinner : function( component ) {
@@ -201,6 +346,47 @@ License: BSD 3-Clause License
     hideSpinner : function( component ) {
 
         $A.util.addClass( component.find( 'spinner' ), 'slds-hide' );
+
+    },
+
+    toastMessage : function( title, message, type ) {
+
+        // https://developer.salesforce.com/docs/atlas.en-us.lightning.meta/lightning/ref_force_showToast.htm
+
+        var helper = this;
+
+        // convenience so code can toast errors without
+        // themselves figuring out how to get the real message from them
+        if ( message instanceof Error ) {
+            message = helper.unwrapAuraErrorMessage( message );
+        }
+
+        $A.get( 'e.force:showToast' ).setParams({
+            title : ( title || 'Message' ),
+            message : ( message || '' ),
+            type : ( type || 'info' )
+        }).fire();
+
+    },
+
+    navigateToFiles : function( selectedFileId, fileIds ) {
+
+        var helper = this;
+
+        var event = $A.get( 'e.lightning:openFiles' );
+
+        if ( event ) {
+
+            event.fire({
+                recordIds : fileIds,
+                selectedRecordId : selectedFileId
+            });
+
+        } else {
+
+            helper.navigateToRecord( selectedFileId );
+
+        }
 
     },
 
@@ -285,7 +471,7 @@ License: BSD 3-Clause License
 
                     helper.logActionErrors( response.getError() );
 
-                    reject( response.getError() );
+                    reject( helper.getMessageFromActionResponseError( response.getError() ) );
 
                 }
             });
@@ -304,17 +490,55 @@ License: BSD 3-Clause License
                     console.error( 'Error: ' + errors[i].message );
                 }
             } else {
-                console.error( 'Error: ' + errors );
+                console.error( 'Error: ' + ( errors.message || errors ) );
             }
         } else {
             console.error( 'Unknown error' );
         }
+    },
+
+    getMessageFromActionResponseError : function( errors ) {
+        var text = '';
+        if ( errors ) {
+            if ( errors.length > 0 ) {
+                for ( var i = 0; i < errors.length; i++ ) {
+                    text += '\n' + errors[i].message;
+                }
+            } else {
+                text = ( errors.message || errors );
+            }
+        }
+        return text;
+    },
+
+    /**
+     * When using $A.getCallback() function, if an error is thrown
+     * then it wraps the error in an AuraError. The AuraError, unfortunately,
+     * has a new message property whose value is "Error in $A.getCallback[YOUR_ORIGINAL_ERROR_MESSAGE]".
+     * The only way to obtain YOUR_ORIGINAL_ERROR_MESSAGE is to substring
+     * the AuraError text out of its message.
+     */
+    unwrapAuraErrorMessage : function( err ) {
+
+        var message = err.message;
+
+        var startStr = 'Error in $A.getCallback() [';
+        var endStr = ']';
+
+        var startIdx = err.message.indexOf( startStr );
+        var endIdx = err.message.lastIndexOf( endStr );
+
+        if ( startIdx >= 0 && endIdx >= 0 ) {
+            message = err.message.substring( startIdx + startStr.length, endIdx );
+        }
+
+        return message;
     }
 })
 /*
 BSD 3-Clause License
 
-Copyright (c) 2017, Doug Ayers
+Copyright (c) 2019, Doug Ayers
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

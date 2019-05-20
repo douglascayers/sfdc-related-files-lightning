@@ -4,9 +4,17 @@ Website: https://douglascayers.com
 GitHub: https://github.com/DouglasCAyers/sfdc-related-files-lightning
 License: BSD 3-Clause License
 */
-.THIS .cf-relationship-nav {
-    padding: 0;
-    background-color: token(colorBackgroundChromeDesktop);
+public with sharing class CF_VisualforceDomainController {
+
+    public String getVisualforceDomainURL() {
+        URL requestURL = URL.getCurrentRequestUrl();
+        return requestURL.toExternalForm().substringBefore( requestURL.getPath() );
+    }
+
+    public String getOrgDomainURL() {
+        return URL.getOrgDomainUrl().toExternalForm();
+    }
+
 }
 /*
 BSD 3-Clause License
