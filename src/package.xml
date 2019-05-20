@@ -5,6 +5,7 @@
         <members>CF_ChildFilesControllerTest</members>
         <members>CF_ChildFilesFilterDynamicPicklist</members>
         <members>CF_ChildFilesFilterDynamicPicklistTest</members>
+        <members>CF_HttpCalloutMock</members>
         <members>CF_NamespaceUtils</members>
         <members>CF_NamespaceUtilsTest</members>
         <members>CF_VisualforceDomainController</members>
