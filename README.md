@@ -53,8 +53,8 @@ Release 1.2 (current release)
 -----------
 
 * Install Package
-    * Browser Links ([Production](https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1I000000h81M)) ([Sandbox](https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1I000000h81M))
-    * Salesforce CLI (`sfdx force:package:install --package 04t1I000000h81M --wait 10`)
+    * Browser Links ([Production](https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1I000000iBEO)) ([Sandbox](https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1I000000iBEO))
+    * Salesforce CLI (`sfdx force:package:install --package 04t1I000000iBEO --wait 10`)
 * [Closed Issues](https://github.com/douglascayers/sfdc-related-files-lightning/milestone/1?closed=1)
 * [Archived Releases](https://github.com/douglascayers/sfdc-related-files-lightning/milestones?state=closed)
 
