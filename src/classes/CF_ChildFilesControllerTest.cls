@@ -150,6 +150,36 @@ private class CF_ChildFilesControllerTest {
     }
 
     @IsTest
+    static void test_queryCustomFieldMetadata_success() {
+
+        Test.setMock( HttpCalloutMock.class, new CF_HttpCalloutMock() );
+
+        Test.startTest();
+
+        CF_ChildFilesController.CustomFieldMetadata metadata = CF_ChildFilesController.queryCustomFieldMetadata( 'Anything', 'Anything' );
+
+        Test.stopTest();
+
+        System.assertEquals( 'Test Relationship Label', metadata.relationshipLabel );
+
+    }
+
+    @IsTest
+    static void test_queryCustomFieldMetadata_error() {
+
+        Test.setMock( HttpCalloutMock.class, new CF_HttpCalloutMock() );
+
+        Test.startTest();
+
+        CF_ChildFilesController.CustomFieldMetadata metadata = CF_ChildFilesController.queryCustomFieldMetadata( 'ERROR', 'ERROR' );
+
+        Test.stopTest();
+
+        System.assertEquals( null, metadata );
+
+    }
+
+    @IsTest
     static void test_constructor_for_visualforce_case() {
 
         Account acct = new Account(

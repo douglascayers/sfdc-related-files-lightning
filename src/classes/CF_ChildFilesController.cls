@@ -27,7 +27,7 @@ public with sharing class CF_ChildFilesController {
             this.record = (SObject) Database.query(
                 String.format(
                     'SELECT {0} FROM {1} WHERE Id = {2}',
-                    new String[] { this.nameField, this.sObjectName, '\'' + this.recordId + '\'' }
+                    new String[] { this.nameField, this.sObjectName, quote( this.recordId ) }
                 )
             );
 
@@ -70,15 +70,13 @@ public with sharing class CF_ChildFilesController {
      * https://developer.salesforce.com/docs/atlas.en-us.lightning.meta/lightning/aura_compref_lightning_datatable.htm
      */
     @AuraEnabled( cacheable = true )
-    public static List<Map<String, String>> getRelatedFilesColumns() {
+    public static List<Map<String, String>> getRelatedFilesColumns( String fieldSetName ) {
 
-        List<Map<String, String>> columns = getRelatedFilesColumnsByFieldSet( 'Related_Files_Columns' );
+        List<Map<String, String>> columns = getRelatedFilesColumnsByFieldSet( fieldSetName );
 
         if ( columns.isEmpty() ) {
             columns.addAll( getDefaultRelatedFilesColumns() );
         }
-
-        System.debug( 'relatedFilesColumns: ' + JSON.serializePretty( columns ) );
 
         return columns;
     }
@@ -142,7 +140,7 @@ public with sharing class CF_ChildFilesController {
 
         columns.add( new Map<String, String>{
             'label' => 'Size',
-            'fieldName' => 'HumanReadableContentSize',
+            'fieldName' => 'ContentSize',
             'fieldPath' => 'ContentSize',
             'type' => 'INTEGER'
         });
@@ -156,12 +154,29 @@ public with sharing class CF_ChildFilesController {
      * Queries ContentDocumentLinks whose LinkedEntityId is in the sub-query
      * on the given object name where the field name equals the field value.
      *
+     * @param relationshipName
+     *      API Name of the relationship between the parent object and the child object.
+     *      For example, 'Contacts' for the relationship from Account down to Contact records.
+     * @param objectName
+     *      API Name of the child object whose files to get.
+     *      For example, 'Contact'.
+     * @param fieldName
+     *      API Name of the lookup field on the child object that references the parent object.
+     *      For example, 'AccountId' for the field on Contact object that references the parent Account object.
+     * @param fieldValue
+     *      The record id to filter by the `fieldName`.
+     *      For example, this would be the parent account id if getting files belonging to contacts related to the account.
+     * @param filesAndNotesFilter
+     *      Indicates if the results should include just Files, Notes, or both.
+     *      Valid values: FILES_ONLY, NOTES_ONLY, FILES_AND_NOTES.
+     * @param fieldSetName
+     *      (optional) Field set on the ContentVersion object that determines the fields to query and display.
      * Example:
-     *      Calling getFiles( 'Contacts', 'Contact', 'AccountId', '001f4000005YzSiAAK' )
-     *      returns files shared to contacts belonging to this account.
+     *      Calling getRelatedFiles( 'Contacts', 'Contact', 'AccountId', '001f4000005YzSiAAK', 'FieldSetName_or_Blank' )
+     *      returns files shared to contacts belonging to the account with id '001f4000005YzSiAAK.
      */
     @AuraEnabled( cacheable = true )
-    public static List<Map<String, Object>> getRelatedFiles( String relationshipName, String objectName, String fieldName, String fieldValue, String filesAndNotesFilter ) {
+    public static List<Map<String, Object>> getRelatedFiles( String relationshipName, String objectName, String fieldName, String fieldValue, String filesAndNotesFilter, String fieldSetName ) {
 
         List<Map<String, Object>> files = new List<Map<String, Object>>();
 
@@ -169,7 +184,7 @@ public with sharing class CF_ChildFilesController {
 
         if ( entityIds.size() > 0 ) {
 
-            List<Map<String, String>> relatedFilesColumns = getRelatedFilesColumns();
+            List<Map<String, String>> relatedFilesColumns = getRelatedFilesColumns( fieldSetName );
             Set<String> soqlSelectColumns = buildSoqlSelectClause( relatedFilesColumns );
 
             String query =
@@ -190,8 +205,6 @@ public with sharing class CF_ChildFilesController {
                     }
                 }
             }
-
-            System.debug( 'query=' + query );
 
             // since we can't group by system dates or some fields on content version
             // then having to use a set to identify the unique files out of all the shared links
@@ -293,14 +306,10 @@ public with sharing class CF_ChildFilesController {
             'LastModifiedDate' => file.LastModifiedDate
         });
 
-        System.debug( 'fileMap: ' + JSON.serializePretty( fileMap ) );
-
         return fileMap;
     }
 
     private static Set<ID> queryForEntityIds( String relationshipName, String objectName, String fieldName, String fieldValue ) {
-
-        System.debug( 'querying entity ids: relationshipName=' + relationshipName + ', objectName=' + objectName + ', fieldName=' + fieldName + ', fieldValue=' + fieldValue );
 
         // Tasks/Event/Activity are strange objects in Salesforce
         // and have very peculiar query restrictions.
@@ -330,8 +339,6 @@ public with sharing class CF_ChildFilesController {
                 new String[] { String.escapeSingleQuotes( relationshipName ), fieldValueSObjectType.getDescribe().getName(), quote( fieldValue ) }
             );
 
-            System.debug( 'recordIdsQuery=' + recordIdsQuery );
-
             for ( List<SObject> records : Database.query( recordIdsQuery ) ) {
                 for ( SObject record : records ) {
                     for ( SObject activity : record.getSObjects( relationshipName ) ) {
@@ -352,8 +359,6 @@ public with sharing class CF_ChildFilesController {
                 'SELECT id FROM {0} WHERE {1} = {2} LIMIT 10000',
                 new String[] { String.escapeSingleQuotes( objectName ), String.escapeSingleQuotes( fieldName ), quote( fieldvalue ) }
             );
-
-            System.debug( 'recordIdsQuery=' + recordIdsQuery );
 
             for ( List<SObject> records : Database.query( recordIdsQuery ) ) {
                 for ( SObject record : records ) {
@@ -507,27 +512,16 @@ public with sharing class CF_ChildFilesController {
                 // Per above comments, we make Tooling API query to get the relationship label for a custom field.
                 if ( fieldDescribe.isCustom() ) {
 
-                    try {
+                    // Task/Activity is a strange object. The lookup relationships are found in `LookedUpFromActivity`
+                    // although the custom fields are defined on the `Activity` entity, so adjust the object name filter accordingly.
+                    String objectNameFilter = ( objectDescribe.getLocalName() == 'LookedUpFromActivity' ? 'Activity' : objectDescribe.getLocalName() );
 
-                        // Task/Activity is a strange object. The lookup relationships are found in `LookedUpFromActivity`
-                        // although the custom fields are defined on the `Activity` entity, so adjust the object name filter accordingly.
-                        String objectNameFilter = ( objectDescribe.getLocalName() == 'LookedUpFromActivity' ? 'Activity' : objectDescribe.getLocalName() );
+                    // On CustomField object, the field names don't include the namespace or __c suffix
+                    String fieldNameFilter = fieldDescribe.getLocalName().substringBeforeLast( '__' );
 
-                        // On CustomField object, the field names don't include the namespace or __c suffix
-                        String fieldNameFilter = fieldDescribe.getLocalName().substringBeforeLast( '__' );
+                    CustomFieldMetadata metadata = queryCustomFieldMetadata( objectNameFilter, fieldNameFilter );
 
-                        CustomFieldMetadata metadata = queryCustomFieldMetadata( objectNameFilter, fieldNameFilter );
-
-                        System.debug( metadata );
-
-                        customFieldRelationshipLabel = ( ( metadata == null ) ? objectDescribe.getLabelPlural() : metadata.relationshipLabel );
-
-                    } catch ( Exception e ) {
-
-                        System.debug( LoggingLevel.ERROR, e.getMessage() + ' : ' + e.getStackTraceString() );
-                        customFieldRelationshipLabel = objectDescribe.getLabelPlural();
-
-                    }
+                    customFieldRelationshipLabel = ( ( metadata == null ) ? objectDescribe.getLabelPlural() : metadata.relationshipLabel );
 
                 }
 
@@ -540,8 +534,6 @@ public with sharing class CF_ChildFilesController {
                     'objectLabel' => objectDescribe.getLabel(),
                     'objectLabelPlural' => objectDescribe.getLabelPlural()
                 });
-
-                System.debug( JSON.serializePretty( describeMaps.get( relationship.getRelationshipName().toUpperCase() ) ) );
 
             }
 
@@ -594,66 +586,75 @@ public with sharing class CF_ChildFilesController {
      * Apex classes to assist with JSON deserialization of CustomField tooling api query result.
      */
 
+    @TestVisible
     private static CustomFieldMetadata queryCustomFieldMetadata( String objectName, String fieldName ) {
-
-        System.debug( 'CF_ChildFilesController.queryCustomFieldMetadata: objectName=' + objectName + ', fieldName=' + fieldName );
-
-        String query = String.format(
-            'SELECT DeveloperName, Metadata FROM CustomField WHERE TableEnumOrId = {0} AND DeveloperName = {1} LIMIT 1',
-            new String[] { quote( objectName ), quote( fieldName ) }
-        );
-
-        System.debug( 'query= ' + query );
-
-        // When invoked in context of a Lightning Component, the session id is not
-        // enabled for API use (annoying...) so we need to obtain one. Thankfully,
-        // Visualforce domain sessions are enabled for API use.
-        PageReference vfPage = Page.CF_VisualforceDomainPage;
-        Map<String, Object> vfPageJson = (Map<String, Object>) JSON.deserializeUntyped( ( Test.isRunningTest() ? '{ "sessionId" : "' + UserInfo.getSessionId() + '" }' : vfPage.getContent().toString().trim() ) );
-
-        System.debug( JSON.serializePretty( vfPageJson ) );
-
-        HttpRequest req = new HttpRequest();
-        req.setEndpoint( String.format(
-            '{0}/services/data/v45.0/tooling/query/?q={1}',
-            new String[] { URL.getOrgDomainUrl().toExternalForm(), EncodingUtil.urlEncode( query, 'UTF-8' ) }
-        ));
-        req.setMethod( 'GET' );
-        req.setCompressed( true );
-        req.setTimeout( 120000 ); // two minutes
-        req.setHeader( 'Accepts', 'application/json;charset=UTF-8' );
-        req.setHeader( 'Authorization', 'Bearer ' + vfPageJson.get( 'sessionId' ) );
-
-        System.debug( req );
-        System.debug( req.getBody() );
-
-        HttpResponse res = new Http().send( req );
-
-        System.debug( res );
-        System.debug( res.getBody() );
-
-        CustomFieldResult result = (CustomFieldResult) JSON.deserialize( res.getBody(), CustomFieldResult.class );
 
         CustomFieldMetadata metadata = null;
 
-        if ( result.records != null ) {
-            for ( CustomFieldRecord record : result.records ) {
-                metadata = record.Metadata;
+        try {
+
+            String query = String.format(
+                'SELECT DeveloperName, Metadata FROM CustomField WHERE TableEnumOrId = {0} AND DeveloperName = {1} LIMIT 1',
+                new String[] { quote( objectName ), quote( fieldName ) }
+            );
+
+            // When invoked in context of a Lightning Component, the session id is not
+            // enabled for API use (annoying...) so we need to obtain one. Thankfully,
+            // Visualforce domain sessions are enabled for API use.
+            PageReference vfPage = Page.CF_VisualforceDomainPage;
+            Map<String, Object> vfPageJson = (Map<String, Object>) JSON.deserializeUntyped( ( Test.isRunningTest() ? '{ "sessionId" : "' + UserInfo.getSessionId() + '" }' : vfPage.getContent().toString().trim() ) );
+
+            HttpRequest req = new HttpRequest();
+            req.setEndpoint( String.format(
+                '{0}/services/data/v45.0/tooling/query/?q={1}',
+                new String[] { URL.getOrgDomainUrl().toExternalForm(), EncodingUtil.urlEncode( query, 'UTF-8' ) }
+            ));
+            req.setMethod( 'GET' );
+            req.setCompressed( true );
+            req.setTimeout( 120000 ); // two minutes
+            req.setHeader( 'Accepts', 'application/json;charset=UTF-8' );
+            req.setHeader( 'Authorization', 'Bearer ' + vfPageJson.get( 'sessionId' ) );
+
+            System.debug( req );
+            System.debug( req.getBody() );
+
+            HttpResponse res = new Http().send( req );
+
+            System.debug( res );
+            System.debug( res.getBody() );
+
+            CustomFieldResult result = (CustomFieldResult) JSON.deserialize( res.getBody(), CustomFieldResult.class );
+
+            if ( result != null && result.records != null ) {
+                for ( CustomFieldRecord record : result.records ) {
+                    if ( record != null ) {
+                        metadata = record.Metadata;
+                    }
+                }
             }
+
+        } catch ( Exception e ) {
+
+            System.debug( LoggingLevel.ERROR, e.getMessage() + ' : ' + e.getStackTraceString() );
+            metadata = null;
+
         }
 
         return metadata;
     }
 
+    @TestVisible
     private class CustomFieldResult {
         public List<CustomFieldRecord> records { get; set; }
     }
 
+    @TestVisible
     private class CustomFieldRecord {
         public String DeveloperName { get; set; }
         public CustomFieldMetadata Metadata { get; set; }
     }
 
+    @TestVisible
     private class CustomFieldMetadata {
         public String relationshipLabel { get; set; }
         public String relationshipName { get; set; }

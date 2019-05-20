@@ -96,6 +96,8 @@ License: BSD 3-Clause License
 
         }).then( $A.getCallback( function( files ) {
 
+            console.log( JSON.stringify( files, null, 2 ) );
+
             return {
                 'files' : files
             };
