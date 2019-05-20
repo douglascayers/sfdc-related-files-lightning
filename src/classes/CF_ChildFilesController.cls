@@ -185,6 +185,83 @@ public with sharing class CF_ChildFilesController {
         if ( entityIds.size() > 0 ) {
 
             List<Map<String, String>> relatedFilesColumns = getRelatedFilesColumns( fieldSetName );
+
+            List<Map<String, String>> additionalColumns = new List<Map<String, String>>();
+
+            // The field set may include lookup fields, like the ContentVersion.LastModifiedById,
+            // and we want to display those in the lightning:datatable as a link to that record and the link text
+            // be the name of that related record, instead of displaying the ID value.
+            //
+            // To do that, then we iterate the original list of columns and for any that are lookup fields then
+            // we add to our 'additionalColumns' list the field path to the lookup record's "name" field.
+            // These additional columns don't change the columns displayed in the datatable, but rather will
+            // query for data that we can then refer to when constructing the URLs to be displayed in the cells of the datatable.
+            for ( Map<String, String> column : relatedFilesColumns ) {
+
+                String fieldType = column.get( 'type' );
+                String fieldPath = column.get( 'fieldPath' );
+                SObjectType objectType = ContentVersion.SObjectType;
+
+                if ( fieldType == 'REFERENCE' ) {
+
+                    String fieldPathToNameField = '';
+
+                    // e.g. 'CreatedBy.Alias' => ('CreatedBy', 'Alias')
+                    String[] fieldPaths = fieldPath.split( '\\.' );
+
+                    // Special Case: if the last field in the path is a reference field,
+                    // then expand the field path to reference the id as a nested field.
+                    // This makes it consistent later on when determining the last sobject in the field path.
+                    if ( fieldPaths.size() > 0 && fieldPaths[fieldPaths.size() - 1].endsWithIgnoreCase( 'Id' ) ) {
+                        String lastFieldPath = fieldPaths.remove( fieldPaths.size() - 1 );
+                        fieldPaths.add( lastFieldPath.substringBeforeLast( 'Id' ) );
+                        fieldPaths.add( 'Id' );
+                    }
+
+                    // Special Case: if the last field in the path is a reference field,
+                    // then expand the field path to reference the id as a nested field.
+                    // This makes it consistent later on when determining the last sobject in the field path.
+                    if ( fieldPaths.size() > 0 && fieldPaths[fieldPaths.size() - 1].endsWithIgnoreCase( '__c' ) ) {
+                        String lastFieldPath = fieldPaths.remove( fieldPaths.size() - 1 );
+                        fieldPaths.add( lastFieldPath.replace( '__c', '__r' ) );
+                        fieldPaths.add( 'Id' );
+                    }
+
+                    // walk object path (e.g. Foo.Bar.Baz)
+                    for ( Integer i = 0; i < fieldPaths.size() - 1; i++ ) {
+
+                        // convert relationship field name into its lookup field name
+                        // e.g. 'Foo__r' => 'Foo__c' and 'Foo' => 'FooId'
+                        String fieldPathFieldName = ( fieldPaths[i].endsWithIgnoreCase( '__r' ) ? fieldPaths[i].replace( '__r', '__c' ) : ( fieldPaths[i] + 'Id' ) );
+
+                        // see if the field exists on the object
+                        SObjectField fieldPathField = objectType.getDescribe().fields.getMap().get( fieldPathFieldName );
+
+                        for ( SObjectType referenceTo : fieldPathField.getDescribe().getReferenceTo() ) {
+                            objectType = referenceTo;
+                        }
+
+                        if ( i > 0 ) {
+                            fieldPathToNameField += '.';
+                        }
+                        fieldPathToNameField += fieldPaths[i];
+
+                    }
+
+                    String objectNameField = getNameField( objectType );
+                    additionalColumns.add( new Map<String, String>{
+                        'type' => 'STRING',
+                        'fieldPath' => fieldPathToNameField + '.' + objectNameField,
+                        'fieldName' => fieldPathToNameField.remove( '.' ) + 'Name',
+                        'label' => objectType.getDescribe().fields.getMap().get( objectNameField ).getDescribe().getLabel()
+                    });
+
+                }
+
+            }
+
+            relatedFilesColumns.addAll( additionalColumns );
+
             Set<String> soqlSelectColumns = buildSoqlSelectClause( relatedFilesColumns );
 
             String query =
@@ -281,7 +358,15 @@ public with sharing class CF_ChildFilesController {
 
             if ( value != null ) {
                 // finally, retrieve property value (e.g. 'Alias' field of 'Owner.Alias' path)
-                fileMap.put( fieldName, value.get( fieldPaths[fieldPaths.size() - 1] ) );
+                Object fieldValue = value.get( fieldPaths[fieldPaths.size() - 1] );
+                fileMap.put( fieldName, fieldValue );
+                // and if the field value is a lookup to another object,
+                // add an entry to the map that is a link to that record
+                // so that we display lookup fields as links in the lightning:datatable
+                DescribeFieldResult fieldDesc = value.getSObjectType().getDescribe().fields.getMap().get( fieldPaths[fieldPaths.size() - 1] ).getDescribe();
+                if ( fieldDesc.getType() == DisplayType.REFERENCE ) {
+                    fileMap.put( 'LinkTo' + fieldName, URL.getOrgDomainUrl().toExternalForm() + '/' + fieldValue );
+                }
             }
 
         }
@@ -295,6 +380,7 @@ public with sharing class CF_ChildFilesController {
             'LinkToContentVersionId' => URL.getOrgDomainUrl().toExternalForm() + '/' + file.Id,
             'Title' => file.Title,
             'OwnerId' => file.OwnerId,
+            'LinkToOwnerId' => URL.getOrgDomainUrl().toExternalForm() + '/' + file.OwnerId,
             'OwnerName' => file.Owner.Name,
             'ContentSize' => file.ContentSize,
             'HumanReadableContentSize' => getHumanReadableByteCount( file.ContentSize ),

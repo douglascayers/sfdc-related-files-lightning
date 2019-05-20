@@ -98,8 +98,6 @@ License: BSD 3-Clause License
 
         }).then( $A.getCallback( function( files ) {
 
-            console.log( JSON.stringify( files, null, 2 ) );
-
             return {
                 'files' : files
             };
@@ -273,7 +271,22 @@ License: BSD 3-Clause License
 
                 case 'ID':
                 case 'REFERENCE':
-                    // dataTableColumn.type = 'url';
+                    var origFieldName = dataTableColumn.fieldName;
+                    var pathToNameField = (
+                        origFieldName.endsWith( 'Id' ) ? origFieldName.slice( 0, -2 ) :
+                        origFieldName.endsWith( '__c' ) ? origFieldName.replace( '__c', '__r' ) : ''
+                    ) + 'Name';
+                    dataTableColumn.fieldName = 'LinkTo' + origFieldName;
+                    dataTableColumn.type = 'url';
+                    dataTableColumn.typeAttributes = Object.assign({
+                        'label' : {
+                            'fieldName' : pathToNameField
+                        },
+                        'tooltip' : {
+                            'fieldName' : pathToNameField
+                        },
+                        'target' : '_blank'
+                    }, dataTableColumn.typeAttributes );
                     break;
 
                 case 'URL':
@@ -317,8 +330,6 @@ License: BSD 3-Clause License
                 dataTableColumn.cellAttributes = {}; // unset
 
             }
-
-            console.log( JSON.stringify( dataTableColumn, null, 2 ) );
 
             return dataTableColumn;
         });
