@@ -30,6 +30,12 @@ License: BSD 3-Clause License
                     access="global"
                     description="Determines if component displays FILES_ONLY, NOTES_ONLY, or FILES_AND_NOTES."/>
 
+    <aura:attribute name="fieldSetName"
+                    type="String"
+                    default=""
+                    access="global"
+                    description="Determines the fields to display from ContentVersion object. If blank then a default set of fields are displayed."/>
+
     <aura:attribute name="childRelationshipNames"
                     type="String"
                     access="global"

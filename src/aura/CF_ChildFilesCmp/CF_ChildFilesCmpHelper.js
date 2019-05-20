@@ -49,12 +49,13 @@ License: BSD 3-Clause License
         var objectDescribe = component.get( 'v.sObjectDescribe' );
         var childRelationshipFiles = component.get( 'v.childRelationshipFiles' );
         var filesAndNotesFilter = component.get( 'v.filesAndNotesFilter' );
+        var fieldSetName = component.get( 'v.fieldSetName' );
 
         var relationshipName = childRelationshipFiles[index].name;
         var objectName = objectDescribe.childRelationships[relationshipName].objectName;
         var fieldName = objectDescribe.childRelationships[relationshipName].fieldName;
 
-        return helper.getRelatedFilesAsync( component, relationshipName, objectName, fieldName, recordId, filesAndNotesFilter, runInBackground )
+        return helper.getRelatedFilesAsync( component, relationshipName, objectName, fieldName, recordId, filesAndNotesFilter, fieldSetName, runInBackground )
             .then( $A.getCallback( function( response ) {
 
                 var childRelationshipFiles = component.get( 'v.childRelationshipFiles' );
@@ -78,7 +79,7 @@ License: BSD 3-Clause License
 
     },
 
-    getRelatedFilesAsync : function( component, relationshipName, objectName, fieldName, fieldValue, filesAndNotesFilter, background ) {
+    getRelatedFilesAsync : function( component, relationshipName, objectName, fieldName, fieldValue, filesAndNotesFilter, fieldSetName, background ) {
 
         var helper = this;
 
@@ -88,7 +89,8 @@ License: BSD 3-Clause License
             'objectName' : objectName,
             'fieldName' : fieldName,
             'fieldValue' : fieldValue,
-            'filesAndNotesFilter' : filesAndNotesFilter
+            'filesAndNotesFilter' : filesAndNotesFilter,
+            'fieldSetName' : fieldSetName
 
         }, {
 
@@ -106,11 +108,15 @@ License: BSD 3-Clause License
 
     },
 
-    getRelatedFilesColumnsAsync : function( component ) {
+    getRelatedFilesColumnsAsync : function( component, fieldSetName ) {
 
         var helper = this;
 
-        return helper.enqueueAction( component, 'c.getRelatedFilesColumns' );
+        return helper.enqueueAction( component, 'c.getRelatedFilesColumns', {
+
+            'fieldSetName' : fieldSetName
+
+        });
 
     },
 

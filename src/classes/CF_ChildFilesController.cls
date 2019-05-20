@@ -97,7 +97,7 @@ public with sharing class CF_ChildFilesController {
 
                     columns.add( new Map<String, String>{
                         'label' => fsm.getLabel(),
-                        'fieldName' => fsm.getFieldPath().remove( '.' ),
+                        'fieldName' => fsm.getFieldPath().remove( '.' ), // Owner.Name => OwnerName
                         'fieldPath' => fsm.getFieldPath(),
                         'type' => String.valueOf( fsm.getType() ).toUpperCase()
                     });

@@ -9,9 +9,10 @@ License: BSD 3-Clause License
 
         var objectName = component.get( 'v.sObjectName' );
         var recordId = component.get( 'v.recordId' );
+        var fieldSetName = component.get( 'v.fieldSetName' );
 
         Promise.all([
-                helper.getRelatedFilesColumnsAsync( component ),        // FieldSetMember
+                helper.getRelatedFilesColumnsAsync( component, fieldSetName ),        // FieldSetMember
                 helper.getObjectDescribeAsync( component, objectName )  // DescribeSObjectResult
             ]).then( $A.getCallback( function( results ) {
 

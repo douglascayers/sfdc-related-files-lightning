@@ -6,19 +6,24 @@ License: BSD 3-Clause License
 -->
 <design:component label="Related Files">
 
-    <design:attribute name="childRelationshipNames"
-                      label="Child Relationships"
-                      description="Comma-separated list of child relationship API names whose related files to show. For example, 'Contacts' to show files belonging to records in contact related list, or 'Invoices__r' to show files belonging to records in custom invoice related list."/>
-
     <design:attribute name="componentCardTitle"
                       label="Title"
                       default="Related Files"
                       description="Title of the component on the page."/>
 
+    <design:attribute name="childRelationshipNames"
+                      label="Child Relationships"
+                      description="Comma-separated list of child relationship API names whose related files to show. For example, 'Contacts' to show files belonging to records in contact related list, or 'Invoices__r' to show files belonging to records in custom invoice related list."/>
+
     <design:attribute name="filesAndNotesFilter"
                       label="Files and/or Notes"
                       datasource="apex://CF_ChildFilesFilterDynamicPicklist"
                       description="Determines if component displays related files and/or notes."/>
+
+    <design:attribute name="fieldSetName"
+                      label="Field Set"
+                      datasource="apex://CF_ChildFilesFieldSetDynamicPicklist"
+                      description="Determines the fields the component displays. Options come from the Content Version object."/>
 
 </design:component>
 <!--
