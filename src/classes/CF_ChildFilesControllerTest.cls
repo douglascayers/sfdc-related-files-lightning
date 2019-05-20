@@ -137,7 +137,7 @@ private class CF_ChildFilesControllerTest {
 
         Test.startTest();
 
-        List<Map<String, String>> defaultColumns = CF_ChildFilesController.getDefaultRelatedFilesColumns();
+        List<Map<String, Object>> defaultColumns = CF_ChildFilesController.getDefaultRelatedFilesColumns();
 
         Test.stopTest();
 

@@ -70,20 +70,45 @@ public with sharing class CF_ChildFilesController {
      * https://developer.salesforce.com/docs/atlas.en-us.lightning.meta/lightning/aura_compref_lightning_datatable.htm
      */
     @AuraEnabled( cacheable = true )
-    public static List<Map<String, String>> getRelatedFilesColumns( String fieldSetName ) {
+    public static List<Map<String, Object>> getRelatedFilesColumns( String fieldSetName ) {
 
-        List<Map<String, String>> columns = getRelatedFilesColumnsByFieldSet( fieldSetName );
+        List<Map<String, Object>> columns = getRelatedFilesColumnsByFieldSet( fieldSetName );
 
         if ( columns.isEmpty() ) {
             columns.addAll( getDefaultRelatedFilesColumns() );
         }
 
+        for ( Map<String, Object> column : columns ) {
+
+            List<String> fieldPaths = ( (String) column.get( 'fieldPath' ) ).split( '\\.' );
+            List<SObjectType> objectTypesInFieldPath = getObjectTypesInFieldPath( ContentVersion.SObjectType, fieldPaths );
+
+            if ( objectTypesInFieldPath.size() > 0 ) {
+
+                SObjectType lastObjectTypeInFieldPath = objectTypesInFieldPath[objectTypesInFieldPath.size() - 1];
+
+                if ( lastObjectTypeInFieldPath != null ) {
+
+                    DescribeFieldResult fieldDesc = lastObjectTypeInFieldPath.getDescribe().fields.getMap().get( fieldPaths[fieldPaths.size() - 1] ).getDescribe();
+
+                    // to know which columns the lightning:datatable should allow to be sorted by the user
+                    column.put( 'sortable', fieldDesc.isSortable() );
+
+                    // TODO implement sort
+                    column.put( 'sortable', false );
+
+                }
+
+            }
+
+        }
+
         return columns;
     }
 
-    private static List<Map<String, String>> getRelatedFilesColumnsByFieldSet( String fieldSetName ) {
+    private static List<Map<String, Object>> getRelatedFilesColumnsByFieldSet( String fieldSetName ) {
 
-        List<Map<String, String>> columns = new List<Map<String, String>>();
+        List<Map<String, Object>> columns = new List<Map<String, Object>>();
 
         Map<String, FieldSet> fsMap = SObjectType.ContentVersion.fieldSets.getMap();
 
@@ -118,32 +143,32 @@ public with sharing class CF_ChildFilesController {
     }
 
     @TestVisible
-    private static List<Map<String, String>> getDefaultRelatedFilesColumns() {
+    private static List<Map<String, Object>> getDefaultRelatedFilesColumns() {
 
-        List<Map<String, String>> columns = new List<Map<String, String>>();
+        List<Map<String, Object>> columns = new List<Map<String, Object>>();
 
-        columns.add( new Map<String, String>{
+        columns.add( new Map<String, Object>{
             'label' => 'Title',
             'fieldName' => 'Title',
             'fieldPath' => 'Title',
             'type' => 'STRING'
         });
 
-        columns.add( new Map<String, String>{
+        columns.add( new Map<String, Object>{
             'label' => 'Owner',
             'fieldName' => 'OwnerId',
             'fieldPath' => 'OwnerId',
             'type' => 'REFERENCE'
         });
 
-        columns.add( new Map<String, String>{
+        columns.add( new Map<String, Object>{
             'label' => 'Last Modified',
             'fieldName' => 'LastModifiedDate',
             'fieldPath' => 'LastModifiedDate',
             'type' => 'DATETIME'
         });
 
-        columns.add( new Map<String, String>{
+        columns.add( new Map<String, Object>{
             'label' => 'Size',
             'fieldName' => 'ContentSize',
             'fieldPath' => 'ContentSize',
@@ -189,86 +214,9 @@ public with sharing class CF_ChildFilesController {
 
         if ( entityIds.size() > 0 ) {
 
-            List<Map<String, String>> relatedFilesColumns = getRelatedFilesColumns( fieldSetName );
+            List<Map<String, Object>> relatedFilesColumns = getRelatedFilesColumns( fieldSetName );
 
-            List<Map<String, String>> additionalColumns = new List<Map<String, String>>();
-
-            // The field set may include lookup fields, like the ContentVersion.LastModifiedById,
-            // and we want to display those in the lightning:datatable as a link to that record and the link text
-            // be the name of that related record, instead of displaying the ID value.
-            //
-            // To do that, then we iterate the original list of columns and for any that are lookup fields then
-            // we add to our 'additionalColumns' list the field path to the lookup record's "name" field.
-            // These additional columns don't change the columns displayed in the datatable, but rather will
-            // query for data that we can then refer to when constructing the URLs to be displayed in the cells of the datatable.
-            for ( Map<String, String> column : relatedFilesColumns ) {
-
-                String fieldType = column.get( 'type' );
-                String fieldPath = column.get( 'fieldPath' );
-                SObjectType objectType = ContentVersion.SObjectType;
-
-                if ( fieldType == 'REFERENCE' ) {
-
-                    String fieldPathToNameField = '';
-
-                    // e.g. 'CreatedBy.Alias' => ('CreatedBy', 'Alias')
-                    String[] fieldPaths = fieldPath.split( '\\.' );
-
-                    // Special Case: if the last field in the path is a reference field,
-                    // then expand the field path to reference the id as a nested field.
-                    // This makes it consistent later on when determining the last sobject in the field path.
-                    if ( fieldPaths.size() > 0 && fieldPaths[fieldPaths.size() - 1].endsWithIgnoreCase( 'Id' ) ) {
-                        String lastFieldPath = fieldPaths.remove( fieldPaths.size() - 1 );
-                        fieldPaths.add( lastFieldPath.substringBeforeLast( 'Id' ) );
-                        fieldPaths.add( 'Id' );
-                    }
-
-                    // Special Case: if the last field in the path is a reference field,
-                    // then expand the field path to reference the id as a nested field.
-                    // This makes it consistent later on when determining the last sobject in the field path.
-                    if ( fieldPaths.size() > 0 && fieldPaths[fieldPaths.size() - 1].endsWithIgnoreCase( '__c' ) ) {
-                        String lastFieldPath = fieldPaths.remove( fieldPaths.size() - 1 );
-                        fieldPaths.add( lastFieldPath.replace( '__c', '__r' ) );
-                        fieldPaths.add( 'Id' );
-                    }
-
-                    // walk object path (e.g. Foo.Bar.Baz)
-                    for ( Integer i = 0; i < fieldPaths.size() - 1; i++ ) {
-
-                        // convert relationship field name into its lookup field name
-                        // e.g. 'Foo__r' => 'Foo__c' and 'Foo' => 'FooId'
-                        String fieldPathFieldName = ( fieldPaths[i].endsWithIgnoreCase( '__r' ) ? fieldPaths[i].replace( '__r', '__c' ) : ( fieldPaths[i] + 'Id' ) );
-
-                        // see if the field exists on the object
-                        SObjectField fieldPathField = objectType.getDescribe().fields.getMap().get( fieldPathFieldName );
-
-                        for ( SObjectType referenceTo : fieldPathField.getDescribe().getReferenceTo() ) {
-                            objectType = referenceTo;
-                        }
-
-                        if ( i > 0 ) {
-                            fieldPathToNameField += '.';
-                        }
-                        fieldPathToNameField += fieldPaths[i];
-
-                    }
-
-                    DescribeFieldResult nameFieldDesc = objectType.getDescribe().fields.getMap().get( getNameField( objectType ) ).getDescribe();
-                    // standard lookup field labels sometimes include the suffix " ID", but in the UI they rarely do,
-                    // so to mimic what the user's are accustomed to then substring the suffix away.
-                    String nameFieldLabel = ( nameFieldDesc.isCustom() ? nameFieldDesc.getLabel() : nameFieldDesc.getLabel().substringBeforeLast( ' ID' ) );
-                    additionalColumns.add( new Map<String, String>{
-                        'type' => 'STRING',
-                        'fieldPath' => fieldPathToNameField + '.' + nameFieldDesc.getName(),
-                        'fieldName' => fieldPathToNameField.remove( '.' ) + 'Name',
-                        'label' => nameFieldLabel
-                    });
-
-                }
-
-            }
-
-            relatedFilesColumns.addAll( additionalColumns );
+            relatedFilesColumns.addAll( getAdditionalFileColumnsForSoqlQuery( relatedFilesColumns ) );
 
             Set<String> soqlSelectColumns = buildSoqlSelectClause( relatedFilesColumns );
 
@@ -320,11 +268,93 @@ public with sharing class CF_ChildFilesController {
         return files;
     }
 
-    private static Set<String> buildSoqlSelectClause( List<Map<String, String>> relatedFilesColumns ) {
+    private static List<Map<String, Object>> getAdditionalFileColumnsForSoqlQuery( List<Map<String, Object>> relatedFilesColumns ) {
+
+        List<Map<String, Object>> additionalColumns = new List<Map<String, Object>>();
+
+        // The field set may include lookup fields, like the ContentVersion.LastModifiedById,
+        // and we want to display those in the lightning:datatable as a link to that record and the link text
+        // be the name of that related record, instead of displaying the ID value.
+        //
+        // To do that, then we iterate the original list of columns and for any that are lookup fields then
+        // we add to our 'additionalColumns' list the field path to the lookup record's "name" field.
+        // These additional columns don't change the columns displayed in the datatable, but rather will
+        // query for data that we can then refer to when constructing the URLs to be displayed in the cells of the datatable.
+        for ( Map<String, Object> column : relatedFilesColumns ) {
+
+            String fieldType = (String) column.get( 'type' );
+            String fieldPath = (String) column.get( 'fieldPath' );
+            SObjectType objectType = ContentVersion.SObjectType;
+
+            if ( fieldType == 'REFERENCE' ) {
+
+                String fieldPathToNameField = '';
+
+                // e.g. 'CreatedBy.Alias' => ('CreatedBy', 'Alias')
+                String[] fieldPaths = fieldPath.split( '\\.' );
+
+                // Special Case: if the last field in the path is a reference field,
+                // then expand the field path to reference the id as a nested field.
+                // This makes it consistent later on when determining the last sobject in the field path.
+                if ( fieldPaths.size() > 0 && fieldPaths[fieldPaths.size() - 1].endsWithIgnoreCase( 'Id' ) ) {
+                    String lastFieldPath = fieldPaths.remove( fieldPaths.size() - 1 );
+                    fieldPaths.add( lastFieldPath.substringBeforeLast( 'Id' ) );
+                    fieldPaths.add( 'Id' );
+                }
+
+                // Special Case: if the last field in the path is a reference field,
+                // then expand the field path to reference the id as a nested field.
+                // This makes it consistent later on when determining the last sobject in the field path.
+                if ( fieldPaths.size() > 0 && fieldPaths[fieldPaths.size() - 1].endsWithIgnoreCase( '__c' ) ) {
+                    String lastFieldPath = fieldPaths.remove( fieldPaths.size() - 1 );
+                    fieldPaths.add( lastFieldPath.replace( '__c', '__r' ) );
+                    fieldPaths.add( 'Id' );
+                }
+
+                // walk object path (e.g. Foo.Bar.Baz)
+                for ( Integer i = 0; i < fieldPaths.size() - 1; i++ ) {
+
+                    // convert relationship field name into its lookup field name
+                    // e.g. 'Foo__r' => 'Foo__c' and 'Foo' => 'FooId'
+                    String fieldPathFieldName = ( fieldPaths[i].endsWithIgnoreCase( '__r' ) ? fieldPaths[i].replace( '__r', '__c' ) : ( fieldPaths[i] + 'Id' ) );
+
+                    // see if the field exists on the object
+                    SObjectField fieldPathField = objectType.getDescribe().fields.getMap().get( fieldPathFieldName );
+
+                    for ( SObjectType referenceTo : fieldPathField.getDescribe().getReferenceTo() ) {
+                        objectType = referenceTo;
+                    }
+
+                    if ( i > 0 ) {
+                        fieldPathToNameField += '.';
+                    }
+                    fieldPathToNameField += fieldPaths[i];
+
+                }
+
+                DescribeFieldResult nameFieldDesc = objectType.getDescribe().fields.getMap().get( getNameField( objectType ) ).getDescribe();
+                // standard lookup field labels sometimes include the suffix " ID", but in the UI they rarely do,
+                // so to mimic what the user's are accustomed to then substring the suffix away.
+                String nameFieldLabel = ( nameFieldDesc.isCustom() ? nameFieldDesc.getLabel() : nameFieldDesc.getLabel().substringBeforeLast( ' ID' ) );
+                additionalColumns.add( new Map<String, Object>{
+                    'type' => 'STRING',
+                    'fieldPath' => fieldPathToNameField + '.' + nameFieldDesc.getName(),
+                    'fieldName' => fieldPathToNameField.remove( '.' ) + 'Name',
+                    'label' => nameFieldLabel
+                });
+
+            }
+
+        }
+
+        return additionalColumns;
+    }
+
+    private static Set<String> buildSoqlSelectClause( List<Map<String, Object>> relatedFilesColumns ) {
 
         Set<String> soqlSelectColumns = new Set<String>();
 
-        for ( Map<String, String> column : relatedFilesColumns ) {
+        for ( Map<String, Object> column : relatedFilesColumns ) {
             if ( column.get( 'type' ) == 'PICKLIST' ) {
                 soqlSelectColumns.add( 'toLabel(ContentDocument.LatestPublishedVersion.' + column.get( 'fieldPath' ) + ')' );
             } else {
@@ -340,14 +370,14 @@ public with sharing class CF_ChildFilesController {
         return soqlSelectColumns;
     }
 
-    private static Map<String, Object> buildFileMap( ContentVersion file, List<Map<String, String>> relatedFilesColumns ) {
+    private static Map<String, Object> buildFileMap( ContentVersion file, List<Map<String, Object>> relatedFilesColumns ) {
 
         Map<String, Object> fileMap = new Map<String, Object>();
 
-        for ( Map<String, String> column : relatedFilesColumns ) {
+        for ( Map<String, Object> column : relatedFilesColumns ) {
 
-            String fieldName = column.get( 'fieldName' );
-            String fieldPath = column.get( 'fieldPath' );
+            String fieldName = (String) column.get( 'fieldName' );
+            String fieldPath = (String) column.get( 'fieldPath' );
 
             // initialize
             fileMap.put( fieldName, null );
@@ -463,6 +493,45 @@ public with sharing class CF_ChildFilesController {
         }
 
         return entityIds;
+    }
+
+    private static List<SObjectType> getObjectTypesInFieldPath( SObjectType startingType, List<String> fieldPaths ) {
+
+        List<SObjectType> objectTypes = new List<SObjectType>();
+
+        SObjectType currentType = startingType;
+
+        for ( Integer i = 0; i < fieldPaths.size(); i++ ) {
+
+            // convert relationship field name into its lookup field name
+            // e.g. 'Foo__r' => 'Foo__c' and 'Foo' => 'FooId'
+            String fieldName = fieldPaths[i];
+            if ( i < fieldPaths.size() - 1 ) {
+                if ( fieldName.endsWithIgnoreCase( '__r' ) ) {
+                    fieldName = fieldName.replace( '__r', '__c' );
+                } else {
+                    fieldName += 'Id';
+                }
+            }
+
+            // see if the field exists on the object
+            if ( currentType != null ) {
+
+                objectTypes.add( currentType );
+
+                SObjectField field = currentType.getDescribe().fields.getMap().get( fieldName );
+
+                if ( field.getDescribe().getReferenceTo().size() > 0 ) {
+                    currentType = field.getDescribe().getReferenceTo().get( 0 );
+                } else {
+                    currentType = null;
+                }
+
+            }
+
+        }
+
+        return objectTypes;
     }
 
     /**

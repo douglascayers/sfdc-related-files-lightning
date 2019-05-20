@@ -5,7 +5,7 @@ GitHub: https://github.com/DouglasCAyers/sfdc-related-files-lightning
 License: BSD 3-Clause License
 */
 ({
-    doInit : function( component, event, helper ) {
+    onInit : function( component, event, helper ) {
 
         var objectName = component.get( 'v.sObjectName' );
         var recordId = component.get( 'v.recordId' );
@@ -69,7 +69,26 @@ License: BSD 3-Clause License
 
     },
 
-    handleChildRelationshipClick : function( component, event, helper ) {
+    onDataTableSort : function( component, event, helper ) {
+
+        var sortedByFieldName = event.getParam( 'fieldName' );
+        var sortedDirection = event.getParam( 'sortDirection' );
+
+        component.set( 'v.sortedByFieldName', sortedByFieldName );
+        component.set( 'v.sortedDirection', sortedDirection );
+
+        // TODO implement sort
+        // things to consider,
+        //      when field name starts with 'LinkTo' then
+        //      the real field name is that without the 'LinkTo' prefix,
+        //      and since that field refers to a lookup field, what we
+        //      really want to sort by is that referenced object's "name" field.
+        //      For example:
+        //          "LinkToOwnerId" => "OwnerId" => "Owner.Name"
+
+    },
+
+    onChildRelationshipClick : function( component, event, helper ) {
 
         var childRelationshipFiles = component.get( 'v.childRelationshipFiles' );
         var selectedIndex = component.get( 'v.selectedIndex' );
@@ -92,7 +111,7 @@ License: BSD 3-Clause License
 
     },
 
-    handleFileClick : function( component, event, helper ) {
+    onFileClick : function( component, event, helper ) {
 
         var clickedFileId = event.srcElement.getAttribute( 'data-fileId' );
         var fileIds = component.get( 'v.selectedFiles' ).map( function( file ) { return file.ContentDocumentId; } );
@@ -101,7 +120,7 @@ License: BSD 3-Clause License
 
     },
 
-    handleUserClick : function( component, event, helper ) {
+    onUserClick : function( component, event, helper ) {
 
         var clickedUserId = event.srcElement.getAttribute( 'data-userId' );
 

@@ -62,9 +62,17 @@ License: BSD 3-Clause License
                     type="Map[]"
                     description="The table columns to display. Intended for lightning:datatable component."/>
 
+    <aura:attribute name="sortedByFieldName"
+                    type="String"
+                    description="Which column the datatable is currently sorted by."/>
+
+    <aura:attribute name="sortedDirection"
+                    type="String"
+                    description="Which direction the datatable is sorted, asc or desc."/>
+
     <!-- Events -->
 
-    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="init" value="{!this}" action="{!c.onInit}"/>
 
     <!-- Markup -->
 
@@ -94,7 +102,7 @@ License: BSD 3-Clause License
                                        class="slds-nav-vertical__action"
                                        title="{!relationship.describe.objectLabelPlural + ' (' + relationship.name + ')'}"
                                        data-index="{!index}"
-                                       onclick="{!c.handleChildRelationshipClick}">
+                                       onclick="{!c.onChildRelationshipClick}">
 
                                         {!relationship.describe.relationshipLabel}
 
