@@ -49,13 +49,13 @@ Seeing a need I began developing this app. After [sharing a sneak peek](https://
 Packaged Release History
 ------------------------
 
-Release 1.2 (current release)
+Release 1.3 (current release)
 -----------
 
 * Install Package
-    * Browser Links ([Production](https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1I000000iBEO)) ([Sandbox](https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1I000000iBEO))
-    * Salesforce CLI (`sfdx force:package:install --package 04t1I000000iBEO --wait 10`)
-* [Closed Issues](https://github.com/douglascayers/sfdc-related-files-lightning/milestone/2?closed=1)
+    * Browser Links ([Production](https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1I000000PNpI)) ([Sandbox](https://test.salesforce.com/packaging/installPackage.apexp?p0=04t1I000000PNpI))
+    * Salesforce CLI (`sfdx force:package:install --package 04t1I000000PNpI --wait 10`)
+* [Closed Issues](https://github.com/douglascayers/sfdc-related-files-lightning/milestone/3?closed=1)
 * [Archived Releases](https://github.com/douglascayers/sfdc-related-files-lightning/milestones?state=closed)
 
 
