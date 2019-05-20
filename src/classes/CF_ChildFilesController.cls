@@ -125,7 +125,7 @@ public with sharing class CF_ChildFilesController {
                     Boolean isCustom = ( fsm.getFieldPath().endsWithIgnoreCase( '__c' ) );
                     String fieldLabel = ( isCustom ? fsm.getLabel() : fsm.getLabel().substringBeforeLast( ' ID' ) );
 
-                    columns.add( new Map<String, String>{
+                    columns.add( new Map<String, Object>{
                         'label' => fieldLabel,
                         'fieldName' => fsm.getFieldPath().remove( '.' ), // Owner.Name => OwnerName
                         'fieldPath' => fsm.getFieldPath(),
