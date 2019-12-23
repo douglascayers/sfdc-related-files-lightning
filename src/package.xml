@@ -10,6 +10,8 @@
         <members>CF_NamespaceUtilsTest</members>
         <members>CF_VisualforceDomainController</members>
         <members>CF_VisualforceDomainControllerTest</members>
+        <members>CF_ChildFilesFieldSetDynamicPicklist</members>
+        <members>CF_ChildFilesFieldSetDynamicPicklistTest</members>
         <name>ApexClass</name>
     </types>
     <types>
