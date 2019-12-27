@@ -9,11 +9,12 @@ License: BSD 3-Clause License
 
         var objectName = component.get( 'v.sObjectName' );
         var recordId = component.get( 'v.recordId' );
-        var fieldSetName = component.get( 'v.fieldSetName' );
+		var fieldSetName = component.get( 'v.fieldSetName' );
+		var childRelationshipNames = component.get( 'v.childRelationshipNames' );
 
         Promise.all([
                 helper.getRelatedFilesColumnsAsync( component, fieldSetName ),        // FieldSetMember
-                helper.getObjectDescribeAsync( component, objectName )  // DescribeSObjectResult
+                helper.getObjectDescribeAsync( component, objectName, childRelationshipNames )  // DescribeSObjectResult
             ]).then( $A.getCallback( function( results ) {
 
                 var fieldSetColumns = results[0];
@@ -24,7 +25,6 @@ License: BSD 3-Clause License
 
                 var selectedIndex = component.get( 'v.selectedIndex' );
                 var filesAndNotesFilter = component.get( 'v.filesAndNotesFilter' );
-                var childRelationshipNames = component.get( 'v.childRelationshipNames' );
                 var childRelationshipFiles = [];
 
                 // if specific list of relationship names are not provided

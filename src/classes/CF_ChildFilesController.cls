@@ -615,9 +615,10 @@ public with sharing class CF_ChildFilesController {
     // -------------------------------------------------------------
 
     @AuraEnabled( cacheable = true )
-    public static Map<String, Object> getObjectDescribe( String myObjectName ) {
+    public static Map<String, Object> getObjectDescribe( String myObjectName, String childRelationshipNamesString ) {
 
         DescribeSObjectResult objectDescribe = ( (SObject) Type.forName( myObjectName ).newInstance() ).getSObjectType().getDescribe();
+        List<String> childRelationshipNames = childRelationshipNamesString.split(',');
 
         Map<String, Object> describeMap = new Map<String, Object>{
             'name' => objectDescribe.getName(),
@@ -626,13 +627,13 @@ public with sharing class CF_ChildFilesController {
             'labelPlural' => objectDescribe.getLabelPlural(),
             'keyPrefix' => objectDescribe.getKeyPrefix(),
             'fields' => getFieldDescribeMaps( objectDescribe.fields.getMap() ),
-            'childRelationships' => getChildRelationshipMaps( objectDescribe.getChildRelationships() )
+            'childRelationships' => getChildRelationshipMaps( objectDescribe.getChildRelationships(), childRelationshipNames )
         };
 
         return describeMap;
     }
 
-    private static Map<String, Map<String, Object>> getChildRelationshipMaps( List<ChildRelationship> childRelationships ) {
+    private static Map<String, Map<String, Object>> getChildRelationshipMaps( List<ChildRelationship> childRelationships, List<String> childRelationshipNames ) {
 
         Set<String> fileLinkableObjectNames = new Set<String>{ 'LookedUpFromActivity' };
 
@@ -653,7 +654,7 @@ public with sharing class CF_ChildFilesController {
             DescribeSObjectResult objectDescribe = relationship.getChildSObject().getDescribe();
             DescribeFieldResult fieldDescribe = relationship.getField().getDescribe();
 
-            if ( String.isNotBlank( relationship.getRelationshipName() ) && fileLinkableObjectNames.contains( objectDescribe.getName() ) ) {
+            if ( String.isNotBlank( relationship.getRelationshipName() ) && fileLinkableObjectNames.contains( objectDescribe.getName() ) && childRelationshipNames.contains( relationship.getRelationshipName() ) {
 
                 // The user-friendly label for related lists are stored in different places for standard and custom fields.
                 //
