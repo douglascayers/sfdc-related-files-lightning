@@ -120,7 +120,7 @@ private class CF_ChildFilesControllerTest {
 
         Test.startTest();
 
-        Map<String, Object> objectDescribeMap = CF_ChildFilesController.getObjectDescribe( 'Account' );
+        Map<String, Object> objectDescribeMap = CF_ChildFilesController.getObjectDescribe( 'Account', 'Opportunities' );
 
         Test.stopTest();
 
