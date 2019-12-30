@@ -654,7 +654,7 @@ public with sharing class CF_ChildFilesController {
             DescribeSObjectResult objectDescribe = relationship.getChildSObject().getDescribe();
             DescribeFieldResult fieldDescribe = relationship.getField().getDescribe();
 
-            if ( String.isNotBlank( relationship.getRelationshipName() ) && fileLinkableObjectNames.contains( objectDescribe.getName() ) && childRelationshipNames.contains( relationship.getRelationshipName() ) {
+            if ( String.isNotBlank( relationship.getRelationshipName() ) && fileLinkableObjectNames.contains( objectDescribe.getName() ) && childRelationshipNames.contains( relationship.getRelationshipName() ) ) {
 
                 // The user-friendly label for related lists are stored in different places for standard and custom fields.
                 //
