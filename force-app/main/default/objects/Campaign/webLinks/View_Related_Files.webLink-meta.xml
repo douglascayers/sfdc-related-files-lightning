@@ -9,5 +9,5 @@
     <masterLabel>View Related Files</masterLabel>
     <openType>sidebar</openType>
     <protected>false</protected>
-    <url>/apex/CF_ChildFilesPage?id={!Order.Id}</url>
+    <url>/apex/CF_ChildFilesPage?id={!Campaign.Id}</url>
 </WebLink>
