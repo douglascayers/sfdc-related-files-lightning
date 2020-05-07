@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<ApexPage xmlns="http://soap.sforce.com/2006/04/metadata">
-    <apiVersion>45.0</apiVersion>
-    <availableInTouch>true</availableInTouch>
-    <confirmationTokenRequired>false</confirmationTokenRequired>
-    <description>Allows users to use the &quot;Related Files&quot; Lightning component within Classic UI. Grant users access to the page via a profile or permission set, then create a link to it passing in the parent record&apos;s id, like &apos;/apex/CF_ChildFilesPage?id={!Account.Id}&apos;.</description>
-    <label>CF_ChildFilesPage</label>
-</ApexPage>

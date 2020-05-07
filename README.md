@@ -5,7 +5,7 @@ See files shared to all related records on one page in Lightning.
 
 This project provides a Lightning Component you can drag on to your Lightning Record Pages in App Builder.
 
-![screen shot](images/related-files-example.png)
+![screen shot](../assets/images/related-files-example.png?raw=true)
 
 Background
 ----------
@@ -29,20 +29,20 @@ However, this "rollup" of Classic Attachments is a much beloved feature and cust
 [Keri-An Richards](https://www.linkedin.com/in/keri-an-richards-44270810/) took to the IdeaExchange and submitted
 [Roll up display of Notes and Attachments in Lightning as it was in Classic](https://success.salesforce.com/ideaView?id=08730000000cHYhAAM).
 
-[![screen shot](images/keri-an-richards.png)](https://success.salesforce.com/ideaView?id=08730000000cHYhAAM)
+[![screen shot](../assets/images/keri-an-richards.png?raw=true)](https://success.salesforce.com/ideaView?id=08730000000cHYhAAM)
 
 Others, like [Abi Beaty](https://success.salesforce.com/_ui/core/chatter/groups/GroupProfilePage?g=0F93A0000009SE1&fId=0D53A000037sJDC)
 and [Hilary Henderson](https://success.salesforce.com/_ui/core/chatter/groups/GroupProfilePage?g=0F93A0000009SE1&fId=0D53A00003Bs5Tk),
 have also inquired on the Success Community how to get this rollup feature in Lightning.
 
-[![screen shot](images/abi-beaty.png)](https://success.salesforce.com/_ui/core/chatter/groups/GroupProfilePage?g=0F93A0000009SE1&fId=0D53A000037sJDC)
+[![screen shot](../assets/images/abi-beaty.png?raw=true)](https://success.salesforce.com/_ui/core/chatter/groups/GroupProfilePage?g=0F93A0000009SE1&fId=0D53A000037sJDC)
 
-[![screen shot](images/hilary-henderson.png)](https://success.salesforce.com/_ui/core/chatter/groups/GroupProfilePage?g=0F93A0000009SE1&fId=0D53A00003Bs5Tk)
+[![screen shot](../assets/images/hilary-henderson.png?raw=true)](https://success.salesforce.com/_ui/core/chatter/groups/GroupProfilePage?g=0F93A0000009SE1&fId=0D53A00003Bs5Tk)
 
 Seeing a need I began developing this app. After [sharing a sneak peek](https://twitter.com/DouglasCAyers/status/900277146668728320) on Twitter,
 [Haris Ikram](https://twitter.com/HarisIkramH), Product Manager for Salesforce, commented that such a solution is in demand and happy to share this with the Salesforce Lightning Team. 
 
-[![screen shot](images/haris-ikram.png)](https://twitter.com/HarisIkramH/status/901074270524104704)
+[![screen shot](../assets/images/haris-ikram.png?raw=true)](https://twitter.com/HarisIkramH/status/901074270524104704)
 
 ---
 
@@ -80,7 +80,7 @@ Getting Started
 
 Check out this 7 minute setup and how-to video:
 
-[![screen shot](images/youtube-cover.png)](https://www.youtube.com/watch?v=14CyPXDxHNI)
+[![screen shot](../assets/images/youtube-cover.png?raw=true)](https://www.youtube.com/watch?v=14CyPXDxHNI)
 
 Recommendations
 ---------------
@@ -121,7 +121,7 @@ then navigate to the lookup field that points to the parent object (that is the 
 On the field's detail page you'll see the field label, field name, and the child relationship name (use this value in App Bulider).
 If this is a custom lookup or master-detail field then [you will need to append `__r` to the child relationship name](https://github.com/DouglasCAyers/sfdc-related-files-lightning/issues/13).
 
-![screen shot](images/setup-child-relationship-field-name.png)
+![screen shot](../assets/images/setup-child-relationship-field-name.png?raw=true)
 
 What do the badge counts mean in the vertical navigation?
 ---------------------------------------------------------
@@ -132,7 +132,7 @@ For example, if the single file "Hello.txt" is shared to 3 contacts related to t
 when viewing this **Related Files** lightning component on that account page would display the badge count 1
 for the `Contacts` relationship even though 3 contacts exist because only 1 unique file was shared among them.
 
-![screen shot](images/related-files-badge-counts.png)
+![screen shot](../assets/images/related-files-badge-counts.png?raw=true)
 
 How do I use this app in Classic?
 ---------------------------------
