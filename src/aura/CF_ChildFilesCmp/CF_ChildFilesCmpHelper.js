@@ -5,13 +5,14 @@ GitHub: https://github.com/DouglasCAyers/sfdc-related-files-lightning
 License: BSD 3-Clause License
 */
 ({
-    getObjectDescribeAsync : function( component, objectName ) {
+    getObjectDescribeAsync : function( component, objectName, childRelationshipNames ) {
 
         var helper = this;
 
         return helper.enqueueAction( component, 'c.getObjectDescribe', {
 
-            'myObjectName' : objectName
+			'myObjectName' : objectName,
+			'childRelationshipNamesString' : childRelationshipNames
 
         }).then( $A.getCallback( function( objectDescribe ) {
 
@@ -197,6 +198,15 @@ License: BSD 3-Clause License
             }
             else if ( /^SNOTE/i.test( file.FileType ) ) {
                 iconName = 'doctype:stypi';
+            }
+			else if ( /^QUIPTEMPLATE/i.test( file.FileType ) ) {
+                iconName = 'doctype:quip_doc';
+            }
+			else if ( /^QUIPDOC/i.test( file.FileType ) ) {
+                iconName = 'doctype:quip_doc';
+            }
+			else if ( /^QUIPSHEET/i.test( file.FileType ) ) {
+                iconName = 'doctype:quip_sheet';
             }
 
             file.FileTypeIconName = iconName;

@@ -128,7 +128,8 @@ License: BSD 3-Clause License
                     columns="{!v.columns}"
                     data="{!v.selectedFiles}"
                     hideCheckboxColumn="true"
-                    showRowNumberColumn="true"/>
+                    showRowNumberColumn="true"
+					columnWidthsMode="auto"/>
 
             </lightning:layoutItem>
 
