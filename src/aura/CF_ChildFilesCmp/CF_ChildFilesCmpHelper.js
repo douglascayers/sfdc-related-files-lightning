@@ -199,6 +199,15 @@ License: BSD 3-Clause License
             else if ( /^SNOTE/i.test( file.FileType ) ) {
                 iconName = 'doctype:stypi';
             }
+			else if ( /^QUIPTEMPLATE/i.test( file.FileType ) ) {
+                iconName = 'doctype:quip_doc';
+            }
+			else if ( /^QUIPDOC/i.test( file.FileType ) ) {
+                iconName = 'doctype:quip_doc';
+            }
+			else if ( /^QUIPSHEET/i.test( file.FileType ) ) {
+                iconName = 'doctype:quip_sheet';
+            }
 
             file.FileTypeIconName = iconName;
 

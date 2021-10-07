@@ -42,16 +42,18 @@ License: BSD 3-Clause License
                         var relationshipName = childRelationshipNames[i].trim().toUpperCase();
                         var isSelected = ( i == selectedIndex );
 
-                        childRelationshipFiles[i] = {
-                            'name' : relationshipName,
-                            'describe' : objectDescribe.childRelationships[relationshipName],
-                            'selected' : isSelected,
-                            'files' : null
-                        };
+						if(objectDescribe.childRelationships[relationshipName] !== undefined) {
+							childRelationshipFiles.push({
+								'name' : relationshipName,
+								'describe' : objectDescribe.childRelationships[relationshipName],
+								'selected' : isSelected,
+								'files' : null
+							});
 
-                        if ( isSelected ) {
-                            component.set( 'v.selectedRelationship', childRelationshipFiles[i] );
-                        }
+							if ( isSelected ) {
+								component.set( 'v.selectedRelationship', childRelationshipFiles[i] );
+							}
+						}
 
                     }
 
