@@ -5,6 +5,8 @@
         <members>CF_ChildFilesControllerTest</members>
         <members>CF_ChildFilesFilterDynamicPicklist</members>
         <members>CF_ChildFilesFilterDynamicPicklistTest</members>
+        <members>CF_ChildFilesFieldSetDynamicPicklist</members>
+        <members>CF_ChildFilesFieldSetDynamicPicklistTest</members>
         <members>CF_HttpCalloutMock</members>
         <members>CF_NamespaceUtils</members>
         <members>CF_NamespaceUtilsTest</members>
